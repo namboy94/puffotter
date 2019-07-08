@@ -1,0 +1,17 @@
+V 0.2.0:
+  - Reboot of the project
+V 0.1.8:
+  - Added SQLite 3 Database existence checker
+V 0.1.7:
+  - Fixed python 2 distribution
+V 0.1.6:
+  - Added support for separate python 2 / 3 distributions
+V 0.1.5:
+  - Added interactive CLI template class
+  - Added methods to ensure files/directories exist
+V 0.1.1:
+  - Fixed setuptools configuration
+V 0.1.0:
+  - Implemented basic file operation methods
+  - Implemented byte string converter
+  - Initial project structure
