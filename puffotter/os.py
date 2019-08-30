@@ -18,6 +18,7 @@ along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 import os
+from typing import Tuple, List
 
 
 def listdir(
@@ -25,7 +26,7 @@ def listdir(
         no_files: bool = False,
         no_dirs: bool = False,
         no_dot: bool = True
-):
+) -> List[Tuple[str, str]]:
     """
     Improves on the standard os.listdir function.
     By default, files and directories starting with `.` are ignored and

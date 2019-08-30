@@ -1,3 +1,7 @@
+V 0.3.0:
+  - Added listdir function
+  - Added unit tests
+  - Uses docker for CI
 V 0.2.0:
   - Reboot of the project
   - Added cryptographic functions
