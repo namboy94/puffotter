@@ -18,8 +18,9 @@ github_mirror:
     - echo "$GITHUB_SSH_KEY" > ~/.ssh/id_rsa
     - chmod 0600 ~/.ssh/id_rsa
   script:
+    - git fetch
     - git-mirror-pusher git@github.com:namboy94/puffotter.git
-      origin/master origin/develop
+      master develop
 
 stylecheck:
   stage: test
