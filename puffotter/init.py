@@ -26,10 +26,8 @@ from argparse import ArgumentParser
 
 def cli_start(
         main_func: Callable,
-        logging_error: bool = False,
-        logging_warning: bool = False,
-        logging_info: bool = False,
-        logging_debug: bool = False,
+        arg_parser: ArgumentParser,
+        exit_msg: str = "Goodbye",
         package_name: Optional[str] = None,
         sentry_dsn: Optional[str] = None,
         release_name: Optional[str] = None,
@@ -37,25 +35,26 @@ def cli_start(
     """
     Starts a program and sets up loggign, as well as sentry error tracking
     :param main_func: The main function to call
-    :param logging_error: Sets the logging level to error
-    :param logging_warning: Sets the logging level to warning
-    :param logging_info: Sets the logging level to info
-    :param logging_debug: Sets the logging level to debug
+    :param arg_parser: The argument parser to use
+    :param exit_msg: The message printed when the program's execution is
+                     stopped using a keyboard interrupt
     :param package_name: The package name of the application
     :param sentry_dsn: The sentry DSN to use
     :param release_name: The name of the release
     :return: None
     """
     try:
-        loglevel = logging.WARNING
-        if logging_error:
+        args = arg_parser.parse_args()
+
+        if "quiet" in args and args.quiet:
             loglevel = logging.ERROR
-        if logging_warning:
-            loglevel = logging.WARNING
-        if logging_info:
+        elif "verbose" in args and args.verbose:
             loglevel = logging.INFO
-        if logging_debug:
+        elif "debug" in args and args.debug:
             loglevel = logging.DEBUG
+        else:
+            loglevel = logging.WARNING
+
         logging.basicConfig(level=loglevel)
 
         version = pkg_resources.get_distribution(package_name).version
@@ -68,9 +67,9 @@ def cli_start(
 
             sentry_sdk.init(sentry_dsn, release=release_name)
 
-        main_func()
+        main_func(args)
     except KeyboardInterrupt:
-        pass
+        print(exit_msg)
 
 
 def argparse_add_verbosity(parser: ArgumentParser):
