@@ -36,7 +36,8 @@ if __name__ == "__main__":
         license="GNU GPL3",
         packages=find_packages(),
         install_requires=[
-            "bcrypt"
+            "bcrypt",
+            "sentry-sdk"
         ],
         test_suite='nose.collector',
         tests_require=['nose'],
