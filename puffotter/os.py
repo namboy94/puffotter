@@ -18,6 +18,7 @@ along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 import os
+import shutil
 from typing import Tuple, List
 
 
@@ -53,3 +54,19 @@ def listdir(
         else:
             content.append((child, child_path))
     return content
+
+
+def makedirs(path: str, delete_before: bool = False):
+    """
+    A more pleasant to use makedirs function.
+    Only calls os.makedirs if the directory does not already exist
+    :param path: The path to the directory to create
+    :param delete_before: If True, deletes the directory beforehand,
+                          if it exists
+    :return: None
+    """
+    if delete_before and os.path.isdir(path):
+        shutil.rmtree(path)
+
+    if not os.path.isdir(path):
+        os.makedirs(path)

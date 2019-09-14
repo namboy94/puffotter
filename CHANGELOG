@@ -1,3 +1,7 @@
+V 0.3.1:
+  - Added puffotter.os.listdir
+  - Added CLI starting helpers
+  - Added unit conversion module
 V 0.3.0:
   - Added listdir function
   - Added unit tests
