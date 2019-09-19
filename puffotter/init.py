@@ -27,8 +27,9 @@ from inspect import signature
 
 def cli_start(
         main_func: Union[
+            Callable[[], None],
             Callable[[Namespace], None],
-            Callable[[logging.Logger], None]
+            Callable[[Namespace, logging.Logger], None]
         ],
         arg_parser: ArgumentParser,
         exit_msg: str = "Goodbye",
@@ -37,7 +38,7 @@ def cli_start(
         release_name: Optional[str] = None
 ):
     """
-    Starts a program and sets up loggign, as well as sentry error tracking
+    Starts a program and sets up logging, as well as sentry error tracking
     :param main_func: The main function to call
     :param arg_parser: The argument parser to use
     :param exit_msg: The message printed when the program's execution is
@@ -72,7 +73,9 @@ def cli_start(
             sentry_sdk.init(sentry_dsn, release=release_name)
 
         sign = signature(main_func)
-        if len(sign.parameters) == 1:
+        if len(sign.parameters) == 0:
+            main_func()
+        elif len(sign.parameters) == 1:
             main_func(args)
         elif len(sign.parameters) == 2:
             logger = logging.getLogger(__name__)
