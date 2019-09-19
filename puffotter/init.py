@@ -20,17 +20,21 @@ LICENSE"""
 import logging
 import pkg_resources
 import sentry_sdk
-from typing import Callable, Optional
-from argparse import ArgumentParser
+from typing import Callable, Optional, Union
+from argparse import ArgumentParser, Namespace
+from inspect import signature
 
 
 def cli_start(
-        main_func: Callable,
+        main_func: Union[
+            Callable[[Namespace], None],
+            Callable[[logging.Logger], None]
+        ],
         arg_parser: ArgumentParser,
         exit_msg: str = "Goodbye",
         package_name: Optional[str] = None,
         sentry_dsn: Optional[str] = None,
-        release_name: Optional[str] = None,
+        release_name: Optional[str] = None
 ):
     """
     Starts a program and sets up loggign, as well as sentry error tracking
@@ -67,7 +71,14 @@ def cli_start(
 
             sentry_sdk.init(sentry_dsn, release=release_name)
 
-        main_func(args)
+        sign = signature(main_func)
+        if len(sign.parameters) == 1:
+            main_func(args)
+        elif len(sign.parameters) == 2:
+            logger = logging.getLogger(__name__)
+            main_func(args, logger)
+        else:
+            print("Invalid amount of parameters for main function")
     except KeyboardInterrupt:
         print(exit_msg)
 
