@@ -18,11 +18,9 @@ along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 import logging
-import pkg_resources
-import sentry_sdk
 from typing import Callable, Optional, Union
 from argparse import ArgumentParser, Namespace
-from inspect import signature
+from argcomplete import autocomplete
 
 
 def cli_start(
@@ -49,6 +47,7 @@ def cli_start(
     :return: None
     """
     try:
+        autocomplete(arg_parser)
         args = arg_parser.parse_args()
 
         if "quiet" in args and args.quiet:
@@ -62,23 +61,27 @@ def cli_start(
 
         logging.basicConfig(level=loglevel)
 
-        version = pkg_resources.get_distribution(package_name).version
-        if sentry_dsn is not None:
-            if release_name is None:
-                if package_name is not None:
-                    release_name = package_name + "-" + version
-                else:
-                    release_name = "Unknown"
+        if release_name is None:
+            if package_name is not None:
+                import pkg_resources
+                version = pkg_resources.get_distribution(package_name).version
+                release_name = package_name + "-" + version
+            else:
+                release_name = "Unknown"
+                package_name = "unknown"
 
+        if sentry_dsn is not None:
+            import sentry_sdk
             sentry_sdk.init(sentry_dsn, release=release_name)
 
+        from inspect import signature
         sign = signature(main_func)
         if len(sign.parameters) == 0:
             main_func()
         elif len(sign.parameters) == 1:
             main_func(args)
         elif len(sign.parameters) == 2:
-            logger = logging.getLogger(__name__)
+            logger = logging.getLogger(package_name)
             main_func(args, logger)
         else:
             print("Invalid amount of parameters for main function")

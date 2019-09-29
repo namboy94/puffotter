@@ -38,7 +38,8 @@ if __name__ == "__main__":
         install_requires=[
             "bcrypt",
             "sentry-sdk",
-            "requests"
+            "requests",
+            "argcomplete"
         ],
         test_suite='nose.collector',
         tests_require=['nose'],
