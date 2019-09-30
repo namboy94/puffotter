@@ -43,8 +43,8 @@ def generate_hash(password: str) -> str:
     :param password: The password to hash
     :return: The hash of the password
     """
-    password = bytes(password, "utf-8")
-    return bcrypt.hashpw(password, bcrypt.gensalt()).decode("utf-8")
+    password_bytes = bytes(password, "utf-8")
+    return bcrypt.hashpw(password_bytes, bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(password: str, hashed: str):
@@ -54,10 +54,10 @@ def verify_password(password: str, hashed: str):
     :param hashed: The hash to verify the password against
     :return: True if the password matches, otherwise False
     """
-    password = bytes(password, "utf-8")
-    hashed = bytes(hashed, "utf-8")
+    password_bytes = bytes(password, "utf-8")
+    hashed_bytes = bytes(hashed, "utf-8")
 
     try:
-        return bcrypt.checkpw(password, hashed)
+        return bcrypt.checkpw(password_bytes, hashed_bytes)
     except ValueError:
         return False

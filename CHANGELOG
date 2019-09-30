@@ -1,6 +1,9 @@
 V 0.4.0:
   - Added graphql class
-  - Add option for logging to cli_start
+  - Added option for logging to cli_start
+  - Added pprint functionality
+  - Added prompt functions
+  - Added function to sanitize file names
 V 0.3.1:
   - Added puffotter.os.listdir
   - Added CLI starting helpers

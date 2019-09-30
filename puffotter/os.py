@@ -70,3 +70,26 @@ def makedirs(path: str, delete_before: bool = False):
 
     if not os.path.isdir(path):
         os.makedirs(path)
+
+
+def replace_illegal_ntfs_chars(string: str) -> str:
+    """
+    Replaces illegal characters in NTFS file systems with
+    appropriate substitutes
+    :param string: Te string in which to replace the illegal characters
+    :return: The sanitized string
+    """
+    illegal_characters = {
+        "/": "ǁ",
+        "\\": "ǁ",
+        "?": "‽",
+        "<": "←",
+        ">": "→",
+        ":": ";",
+        "*": "∗",
+        "|": "ǁ",
+        "\"": "“"
+    }
+    for illegal_character, replacement in illegal_characters.items():
+        string = string.replace(illegal_character, replacement)
+    return string

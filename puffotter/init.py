@@ -77,12 +77,12 @@ def cli_start(
         from inspect import signature
         sign = signature(main_func)
         if len(sign.parameters) == 0:
-            main_func()
+            main_func()  # type: ignore
         elif len(sign.parameters) == 1:
-            main_func(args)
+            main_func(args)  # type: ignore
         elif len(sign.parameters) == 2:
             logger = logging.getLogger(package_name)
-            main_func(args, logger)
+            main_func(args, logger)  # type: ignore
         else:
             print("Invalid amount of parameters for main function")
     except KeyboardInterrupt:
