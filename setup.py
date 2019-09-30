@@ -37,7 +37,10 @@ if __name__ == "__main__":
         packages=find_packages(),
         install_requires=[
             "bcrypt",
-            "sentry-sdk"
+            "sentry-sdk",
+            "requests",
+            "argcomplete",
+            "colorama"
         ],
         test_suite='nose.collector',
         tests_require=['nose'],
