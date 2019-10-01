@@ -94,22 +94,25 @@ def selection_prompt(objects: List[object]) -> List[object]:
 def prompt_comma_list(
         message: str,
         primitive_type: Callable[[str], Any] = str,
-        min_count: int = 0
+        min_count: int = 0,
+        no_empty: bool = True
 ) -> List[Any]:
     """
     Prompts the user for a comma-separated list
     :param message: The message to display
     :param primitive_type: The primitive type of the elements in the list
     :param min_count: The minimum amount of elements to be provided by the user
+    :param no_empty: Removes any empty strings
     :return: The result of the prompt
     """
     while True:
         try:
             response = input(message)
-            result = list(map(
-                lambda x: primitive_type(x.strip()),
-                response.split(",")
-            ))
+            result = list(map(lambda x: x.strip(), response.split(",")))
+
+            if "" in result and no_empty:
+                result.remove("")
+            result = list(map(lambda x: primitive_type(x), result))
 
             if len(result) < min_count:
                 print("Not enough values")
