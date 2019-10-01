@@ -53,7 +53,6 @@ def selection_prompt(objects: List[object]) -> List[object]:
     :param objects: The objects to show
     :return: The selection of objects
     """
-
     fill = len(str(len(objects)))
     for i, obj in enumerate(objects):
         print("[{}] {}".format(str(i + 1).zfill(fill), str(obj)))
@@ -95,7 +94,8 @@ def prompt_comma_list(
         message: str,
         primitive_type: Callable[[str], Any] = str,
         min_count: int = 0,
-        no_empty: bool = True
+        no_empty: bool = True,
+        default: Optional[List[Any]] = None
 ) -> List[Any]:
     """
     Prompts the user for a comma-separated list
@@ -103,11 +103,19 @@ def prompt_comma_list(
     :param primitive_type: The primitive type of the elements in the list
     :param min_count: The minimum amount of elements to be provided by the user
     :param no_empty: Removes any empty strings
+    :param default: A default value
     :return: The result of the prompt
     """
     while True:
         try:
-            response = input(message)
+            if default is not None:
+                response = input(message + " ({})".format(default))
+            else:
+                response = input(message)
+
+            if default is not None and response == "":
+                return default
+
             result = list(map(lambda x: x.strip(), response.split(",")))
 
             if "" in result and no_empty:
@@ -139,13 +147,14 @@ def prompt(
     :param required: Whether or not as response is required
     :return: The prompt result. May be None if required is False
     """
+    prompt_message = prompt_text
     if default is not None:
-        prompt_text += " {}".format(str(default))
-    prompt_text += ":"
+        prompt_message += " {}".format(str(default))
+    prompt_message += ":"
 
-    response = input(prompt_text).strip()
+    response = input(prompt_message).strip()
     while response == "" and default is None:
-        response = input(prompt_text).strip()
+        response = input(prompt_message).strip()
 
     if response == "" and default is not None:
         return default
