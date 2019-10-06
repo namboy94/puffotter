@@ -59,3 +59,35 @@ def byte_string_to_byte_count(byte_string: str) -> int:
                     raise ValueError()
 
     return multiplier * int(byte_num)
+
+
+def human_readable_bytes(bytecount: int, base_1024: bool = False) -> str:
+    """
+    Converts an amount of bytes into a human-readable string
+    :param bytecount: The bytes to convert
+    :param base_1024: Whether or not to use 1024 as base (for mebibytes etc)
+    :return: The human-readable string
+    """
+    units = ["K", "M", "G", "T", "P", "E", "Z", "Y"]
+    unit_index = -1
+    base = 1024 if base_1024 else 1000
+
+    while True:
+        bytecount /= base
+        unit_index += 1
+
+        if int(bytecount) < base or unit_index == len(units) - 1:
+            break
+
+    # Formatting
+    bytestring = ("%.3f" % bytecount)
+    string_index = len(bytestring) - 1
+    while bytestring[string_index] == "0":
+        string_index -= 1
+    bytestring = bytestring[0:string_index + 1]
+
+    if bytestring.endswith("."):
+        bytestring = bytestring[0:-1]
+
+    i = "i" if base_1024 else ""
+    return bytestring + units[unit_index] + i + "B"

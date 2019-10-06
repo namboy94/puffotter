@@ -1,3 +1,5 @@
+V 0.4.5:
+  - Added function to convert an amount of bytes into a human-readable string
 V 0.4.4:
   - Added default parameter to commalist prompt
 V 0.4.3:
