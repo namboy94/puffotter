@@ -93,3 +93,14 @@ def replace_illegal_ntfs_chars(string: str) -> str:
     for illegal_character, replacement in illegal_characters.items():
         string = string.replace(illegal_character, replacement)
     return string
+
+
+def create_file(path: str):
+    """
+    Creates an empty file
+    :param path: The path to the file
+    :return: None
+    """
+    if not os.path.isfile(path):
+        with open(path, "w") as f:
+            f.write("")

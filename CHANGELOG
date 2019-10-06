@@ -1,3 +1,9 @@
+V 0.4.5:
+  - Added function to convert an amount of bytes into a human-readable string
+V 0.4.4:
+  - Added default parameter to commalist prompt
+V 0.4.3:
+  - Added create_file function
 V 0.4.2:
   - Fixed issues with comma list prompts giving empty strings
 V 0.4.1:
