@@ -71,16 +71,17 @@ def human_readable_bytes(bytecount: int, base_1024: bool = False) -> str:
     units = ["K", "M", "G", "T", "P", "E", "Z", "Y"]
     unit_index = -1
     base = 1024 if base_1024 else 1000
+    _bytes = float(bytecount)
 
     while True:
-        bytecount /= base
+        _bytes /= base
         unit_index += 1
 
-        if int(bytecount) < base or unit_index == len(units) - 1:
+        if int(_bytes) < base or unit_index == len(units) - 1:
             break
 
     # Formatting
-    bytestring = ("%.3f" % bytecount)
+    bytestring = ("%.3f" % _bytes)
     string_index = len(bytestring) - 1
     while bytestring[string_index] == "0":
         string_index -= 1
