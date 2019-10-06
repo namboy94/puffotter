@@ -61,11 +61,17 @@ def byte_string_to_byte_count(byte_string: str) -> int:
     return multiplier * int(byte_num)
 
 
-def human_readable_bytes(bytecount: int, base_1024: bool = False) -> str:
+def human_readable_bytes(
+        bytecount: int,
+        base_1024: bool = False,
+        remove_trailing_zeroes: bool = True
+) -> str:
     """
     Converts an amount of bytes into a human-readable string
     :param bytecount: The bytes to convert
     :param base_1024: Whether or not to use 1024 as base (for mebibytes etc)
+    :param remove_trailing_zeroes: If set to True, will remove any trailing
+                                   zeroes from the string
     :return: The human-readable string
     """
     units = ["K", "M", "G", "T", "P", "E", "Z", "Y"]
@@ -82,13 +88,15 @@ def human_readable_bytes(bytecount: int, base_1024: bool = False) -> str:
 
     # Formatting
     bytestring = ("%.3f" % _bytes)
-    string_index = len(bytestring) - 1
-    while bytestring[string_index] == "0":
-        string_index -= 1
-    bytestring = bytestring[0:string_index + 1]
 
-    if bytestring.endswith("."):
-        bytestring = bytestring[0:-1]
+    if remove_trailing_zeroes:
+        string_index = len(bytestring) - 1
+        while bytestring[string_index] == "0":
+            string_index -= 1
+        bytestring = bytestring[0:string_index + 1]
+
+        if bytestring.endswith("."):
+            bytestring = bytestring[0:-1]
 
     i = "i" if base_1024 else ""
     return bytestring + units[unit_index] + i + "B"
