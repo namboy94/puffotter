@@ -18,6 +18,7 @@ along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 import os
+import sys
 import logging
 from logging.handlers import RotatingFileHandler
 from typing import Callable, Optional, Union
@@ -95,6 +96,8 @@ def argparse_add_verbosity(parser: ArgumentParser):
     parser.add_argument("-d", "--debug", action="store_true",
                         help="Sets the verbosity level of the program to "
                              "'debug'")
+    parser.add_argument("--silent", action="store_true",
+                        help="Silences all output to STDOUT")
 
 
 def argparse_add_logfile(parser: ArgumentParser):
@@ -157,3 +160,6 @@ def setup_logging(args: Namespace, package_name: Optional[str]):
         handlers.append(rotating_handler)
 
     logging.basicConfig(level=logging.DEBUG, handlers=handlers)
+
+    if "silent" in args and args.silent:
+        sys.stdout = open(os.devnull, "w")
