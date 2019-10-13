@@ -39,7 +39,6 @@ if __name__ == "__main__":
             "bcrypt",
             "sentry-sdk",
             "requests",
-            "argcomplete",
             "colorama"
         ],
         test_suite='nose.collector',
