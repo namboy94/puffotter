@@ -118,7 +118,10 @@ def setup_logging(args: Namespace, package_name: Optional[str]):
     :return: None
     """
 
-    if "quiet" in args and args.quiet:
+    if "silent" in args and args.silent:
+        loglevel = 100  # Disable all logging output
+        sys.stdout = open(os.devnull, "w")  # Disable all print output
+    elif "quiet" in args and args.quiet:
         loglevel = logging.ERROR
     elif "verbose" in args and args.verbose:
         loglevel = logging.INFO
@@ -160,6 +163,3 @@ def setup_logging(args: Namespace, package_name: Optional[str]):
         handlers.append(rotating_handler)
 
     logging.basicConfig(level=logging.DEBUG, handlers=handlers)
-
-    if "silent" in args and args.silent:
-        sys.stdout = open(os.devnull, "w")
