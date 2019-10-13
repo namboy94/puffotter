@@ -19,7 +19,7 @@ LICENSE"""
 
 import os
 import shutil
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 
 
 def listdir(
@@ -104,3 +104,15 @@ def create_file(path: str):
     if not os.path.isfile(path):
         with open(path, "w") as f:
             f.write("")
+
+
+def get_ext(filename: str) -> Optional[str]:
+    """
+    Gets the file extension of a file
+    :param filename: The filename for which to get the file extension
+    :return: The file extension or None if the file has no extension
+    """
+    try:
+        return filename.rsplit(".", 1)[1]
+    except IndexError:
+        return None
