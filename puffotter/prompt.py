@@ -68,7 +68,7 @@ def selection_prompt(objects: List[object]) -> List[object]:
             try:
                 start_index = int(item)
                 end_index = start_index
-            except IndexError:
+            except ValueError:
                 try:
                     start, end = item.split("-", 1)
                     start_index = int(start)
