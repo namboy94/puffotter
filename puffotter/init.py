@@ -156,7 +156,7 @@ def setup_logging(args: Namespace, package_name: Optional[str]):
         makedirs(log_dir)
         log_file = os.path.join(log_dir, "logs.log")
         rotating_handler = RotatingFileHandler(
-            log_file, maxBytes=5000000, backupCount=5
+            log_file, maxBytes=50000000, backupCount=10
         )
         rotating_handler.setFormatter(file_formatter)
         rotating_handler.setLevel(logging.DEBUG)
