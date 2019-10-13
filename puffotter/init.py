@@ -17,10 +17,12 @@ You should have received a copy of the GNU General Public License
 along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
+import os
 import logging
+from logging.handlers import RotatingFileHandler
 from typing import Callable, Optional, Union
 from argparse import ArgumentParser, Namespace
-from argcomplete import autocomplete
+from puffotter.os import makedirs
 
 
 def cli_start(
@@ -47,19 +49,8 @@ def cli_start(
     :return: None
     """
     try:
-        autocomplete(arg_parser)
         args = arg_parser.parse_args()
-
-        if "quiet" in args and args.quiet:
-            loglevel = logging.ERROR
-        elif "verbose" in args and args.verbose:
-            loglevel = logging.INFO
-        elif "debug" in args and args.debug:
-            loglevel = logging.DEBUG
-        else:
-            loglevel = logging.WARNING
-
-        logging.basicConfig(level=loglevel)
+        setup_logging(args, package_name)
 
         if release_name is None:
             if package_name is not None:
@@ -104,3 +95,65 @@ def argparse_add_verbosity(parser: ArgumentParser):
     parser.add_argument("-d", "--debug", action="store_true",
                         help="Sets the verbosity level of the program to "
                              "'debug'")
+
+
+def argparse_add_logfile(parser: ArgumentParser):
+    """
+    Adds the --logfile argument to the argument parser
+    :param parser: The argument parser to modify
+    :return: None
+    """
+    parser.add_argument("--logfile",
+                        help="Specifies the location of a logfile")
+
+
+def setup_logging(args: Namespace, package_name: Optional[str]):
+    """
+    Sets up logging for the provided arguments
+    :param args: The CLI arguments
+    :param package_name: The package name
+    :return: None
+    """
+
+    if "quiet" in args and args.quiet:
+        loglevel = logging.ERROR
+    elif "verbose" in args and args.verbose:
+        loglevel = logging.INFO
+    elif "debug" in args and args.debug:
+        loglevel = logging.DEBUG
+    else:
+        loglevel = logging.WARNING
+
+    file_formatter = logging.Formatter(
+        "[%(asctime)s] %(levelname)s:[%(filename)s:%(funcName)s(%(lineno)d)] "
+        "%(message)s",
+        datefmt="%Y-%m-%d:%H-%M-%S")
+
+    stream_formatter = logging.Formatter("%(levelname)s: %(message)s")
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(stream_formatter)
+    stream_handler.setLevel(loglevel)
+
+    handlers = [stream_handler]
+
+    if "logfile" in args and args.logfile is not None:
+        log_file = args.logfile
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setFormatter(file_formatter)
+        file_handler.setLevel(logging.DEBUG)
+        handlers.append(file_handler)
+
+    if package_name is not None:
+        log_dir = os.path.join(
+            os.path.expanduser("~"), ".config", package_name
+        )
+        makedirs(log_dir)
+        log_file = os.path.join(log_dir, "logs.log")
+        rotating_handler = RotatingFileHandler(
+            log_file, maxBytes=5000000, backupCount=5
+        )
+        rotating_handler.setFormatter(file_formatter)
+        rotating_handler.setLevel(logging.DEBUG)
+        handlers.append(rotating_handler)
+
+    logging.basicConfig(level=logging.DEBUG, handlers=handlers)
