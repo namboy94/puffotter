@@ -1,3 +1,6 @@
+V 0.5.1:
+  - Added get_ext function
+  - Added choices option to prompt function
 V 0.5.0:
   - Added capability to log to files easily
   - Added silent option

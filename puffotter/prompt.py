@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-from typing import List, Any, Callable, Optional
+from typing import List, Any, Callable, Optional, Set
 
 
 def yn_prompt(
@@ -136,7 +136,8 @@ def prompt(
         prompt_text: str = "",
         default: Optional[Any] = None,
         _type: Callable[[str], Any] = str,
-        required: bool = True
+        required: bool = True,
+        choices: Optional[Set[str]] = None
 ) -> Optional[Any]:
     """
     Generic prompt with configuration options
@@ -145,15 +146,22 @@ def prompt(
     :param _type: The type of the object prompted. Must take a single string
                   as a parameter
     :param required: Whether or not as response is required
+    :param choices: Valid choices for the prompt
     :return: The prompt result. May be None if required is False
     """
     prompt_message = prompt_text
+
+    if choices is not None:
+        prompt_message += "choices:({})".format(choices)
+
     if default is not None:
-        prompt_message += " {}".format(str(default))
+        prompt_message += "default:{}".format(str(default))
+
     prompt_message += ":"
 
     response = input(prompt_message).strip()
-    while response == "" and default is None:
+    while response == "" and default is None \
+            or (choices is not None and response not in choices):
         response = input(prompt_message).strip()
 
     if response == "" and default is not None:
