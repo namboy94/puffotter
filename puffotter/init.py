@@ -21,7 +21,7 @@ import os
 import sys
 import logging
 from logging.handlers import RotatingFileHandler
-from typing import Callable, Optional, Union
+from typing import Callable, Optional, Union, List
 from argparse import ArgumentParser, Namespace
 from puffotter.os import makedirs
 
@@ -140,7 +140,7 @@ def setup_logging(args: Namespace, package_name: Optional[str]):
     stream_handler.setFormatter(stream_formatter)
     stream_handler.setLevel(loglevel)
 
-    handlers = [stream_handler]
+    handlers = [stream_handler]  # type: List[logging.Handler]
 
     if "logfile" in args and args.logfile is not None:
         log_file = args.logfile
