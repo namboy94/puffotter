@@ -18,6 +18,7 @@ along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 from typing import List, Any, Callable, Optional, Set
+from colorama import Fore, Style
 
 
 def yn_prompt(
@@ -35,7 +36,9 @@ def yn_prompt(
     :param case_sensitive: Whether or not the prompt should be case-sensitive
     :return: True if the user specified 'y', else False
     """
-    resp = input(message + " (y|n): ").strip()
+    resp = input("{} {}(y|n){}: ".format(
+        message, Fore.LIGHTYELLOW_EX, Style.RESET_ALL
+    )).strip()
     if not case_sensitive:
         resp = resp.lower()
 
@@ -108,15 +111,25 @@ def prompt_comma_list(
     """
     while True:
         try:
+            prompt_message = message
             if default is not None:
-                response = input(message + " ({})".format(default))
-            else:
-                response = input(message)
+                prompt_message = "{} {}{}{}".format(
+                    prompt_message,
+                    Fore.LIGHTGREEN_EX,
+                    default,
+                    Style.RESET_ALL
+                )
+            prompt_message += ": "
+
+            response = input(prompt_message).strip()
 
             if default is not None and response == "":
                 return default
 
-            result = list(map(lambda x: x.strip(), response.split(",")))
+            if default is not None and response == "[]":
+                result = []
+            else:
+                result = list(map(lambda x: x.strip(), response.split(",")))
 
             if "" in result and no_empty:
                 result.remove("")
@@ -152,12 +165,22 @@ def prompt(
     prompt_message = prompt_text
 
     if choices is not None:
-        prompt_message += "choices:({})".format(choices)
+        prompt_message = "{} {}{}{}".format(
+            prompt_message,
+            Fore.LIGHTYELLOW_EX,
+            choices,
+            Style.RESET_ALL
+        )
 
     if default is not None:
-        prompt_message += "default:{}".format(str(default))
+        prompt_message = "{} {}{}{}".format(
+            prompt_message,
+            Fore.LIGHTGREEN_EX,
+            default,
+            Style.RESET_ALL
+        )
 
-    prompt_message += ":"
+    prompt_message += ": "
 
     response = input(prompt_message).strip()
     while response == "" and default is None \
