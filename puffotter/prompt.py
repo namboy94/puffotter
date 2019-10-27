@@ -158,7 +158,7 @@ def prompt(
     :param default: A default value to use if the user responds with ''
     :param _type: The type of the object prompted. Must take a single string
                   as a parameter
-    :param required: Whether or not as response is required
+    :param required: Whether or not a response is required
     :param choices: Valid choices for the prompt
     :return: The prompt result. May be None if required is False
     """
@@ -183,8 +183,14 @@ def prompt(
     prompt_message += ": "
 
     response = input(prompt_message).strip()
-    while response == "" and default is None \
-            or (choices is not None and response not in choices):
+
+    while \
+            response == "" and default is None \
+            or (
+                    choices is not None
+                    and response not in choices
+                    and default is None
+            ):
         response = input(prompt_message).strip()
 
     if response == "" and default is not None:
