@@ -127,7 +127,7 @@ def prompt_comma_list(
                 return default
 
             if default is not None and response == "[]":
-                result = []
+                result = []  # type: List[str]
             else:
                 result = list(map(lambda x: x.strip(), response.split(",")))
 
