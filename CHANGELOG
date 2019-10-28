@@ -1,3 +1,6 @@
+V 0.6.0:
+  - Fixed some prompting issues
+  - Added requests and subprocess modules
 V 0.5.1:
   - Added get_ext function
   - Added choices option to prompt function
