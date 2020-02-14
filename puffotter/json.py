@@ -45,16 +45,16 @@ def _serialize(obj: Any, deep: bool) -> Any:
     :return: The serialized object
     """
     if isinstance(obj, dict):
-        serialized = {}
+        serialized_dict = {}
         for key, val in obj.items():
-            serialized[key] = _serialize(val, deep)
-        return serialized
+            serialized_dict[key] = _serialize(val, deep)
+        return serialized_dict
 
     elif isinstance(obj, list):
-        serialized = []
+        serialized_list = []
         for val in obj:
-            serialized.append(_serialize(val, deep))
-        return serialized
+            serialized_list.append(_serialize(val, deep))
+        return serialized_list
 
     elif isinstance(obj, tuple):
         return tuple(_serialize(list(obj), deep))
