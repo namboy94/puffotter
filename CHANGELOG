@@ -1,3 +1,7 @@
+V 0.7.0:
+  - Added json module
+  - Added imap and smtp modules
+  - Added recaptcha module
 V 0.6.0:
   - Fixed some prompting issues
   - Added requests and subprocess modules
