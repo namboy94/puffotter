@@ -1,3 +1,5 @@
+V 0.8.0:
+  - Added env module
 V 0.7.0:
   - Added json module
   - Added imap and smtp modules
