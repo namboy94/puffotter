@@ -70,7 +70,7 @@ def register() -> Union[Response, str]:
         password_repeat = request.form["password-repeat"]
         recaptcha_result = verify_recaptcha(
             request.remote_addr,
-            request.form["g-recaptcha-response"],
+            request.form.get("g-recaptcha-response", ""),
             Config.RECAPTCHA_SECRET_KEY
         )
 
@@ -161,7 +161,7 @@ def forgot() -> Union[Response, str]:
         email = request.form["email"]
         recaptcha_result = verify_recaptcha(
             request.remote_addr,
-            request.form["g-recaptcha-response"],
+            request.form.get("g-recaptcha-response", ""),
             Config.RECAPTCHA_SECRET_KEY
         )
         user: User = User.query.filter_by(email=email).first()
