@@ -1,3 +1,5 @@
+V 0.9.1:
+  - Fixed errors when missing recaptcha string in form
 V 0.9.0:
   - Added flask module
 V 0.8.0:
