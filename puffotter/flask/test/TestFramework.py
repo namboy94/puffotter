@@ -62,7 +62,7 @@ class _TestFramework(TestCase):
             os.environ["RECAPTCHA_SITE_KEY"] = ""
             os.environ["RECAPTCHA_SECRET_KEY"] = ""
             os.environ["SMTP_HOST"] = ""
-            os.environ["SMTP_PORT"] = ""
+            os.environ["SMTP_PORT"] = "0"
             os.environ["SMTP_ADDRESS"] = ""
             os.environ["SMTP_PASSWORD"] = ""
         else:
