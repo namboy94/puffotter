@@ -39,7 +39,7 @@ class _TestFramework(TestCase):
     module_name: str = "puffotter"
     models: List[db.Model] = []
     blueprints: List[Blueprint] = []
-    root_path: str = "/home/hermann/git/puffotter"
+    root_path: str = "."
 
     def setUp(self):
         """
