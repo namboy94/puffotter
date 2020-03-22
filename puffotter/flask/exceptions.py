@@ -17,27 +17,18 @@ You should have received a copy of the GNU General Public License
 along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-import imaplib
 
+class ApiException(Exception):
+    """
+    Api raised when an API-related exception occurs
+    """
 
-def get_inbox_count(
-        imap_server: str,
-        imap_address: str,
-        imap_password: str,
-        imap_port: int = 993
-) -> int:
-    """
-    Checks the amount of emails in an IMAP inbox
-    :param imap_server: The IMAP server to use
-    :param imap_address: The IMAP address to use
-    :param imap_password: The IMAP password to use
-    :param imap_port: The IMAP port to use
-    :return: The amount of emails
-    """
-    server = imaplib.IMAP4_SSL(imap_server, imap_port)
-    server.login(imap_address, imap_password)
-    content = server.select("Inbox")[1][0]
-    counted = 0 if content is None else int(content)
-    server.close()
-    server.logout()
-    return counted
+    def __init__(self, reason: str, status_code: int):
+        """
+        Initializes the exception
+        :param reason: The reason the API Exception was raised
+        :param status_code: The status code associated with the exception
+        """
+        super().__init__(reason)
+        self.reason = reason
+        self.status_code = status_code
