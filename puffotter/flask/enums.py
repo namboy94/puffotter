@@ -17,27 +17,31 @@ You should have received a copy of the GNU General Public License
 along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-import imaplib
+
+from enum import Enum
 
 
-def get_inbox_count(
-        imap_server: str,
-        imap_address: str,
-        imap_password: str,
-        imap_port: int = 993
-) -> int:
+class AlertSeverity(Enum):
     """
-    Checks the amount of emails in an IMAP inbox
-    :param imap_server: The IMAP server to use
-    :param imap_address: The IMAP address to use
-    :param imap_password: The IMAP password to use
-    :param imap_port: The IMAP port to use
-    :return: The amount of emails
+    Enumeration that defines the various levels of severity an alert can have
     """
-    server = imaplib.IMAP4_SSL(imap_server, imap_port)
-    server.login(imap_address, imap_password)
-    content = server.select("Inbox")[1][0]
-    counted = 0 if content is None else int(content)
-    server.close()
-    server.logout()
-    return counted
+
+    SUCCESS = "success"
+    """
+    Translates to a green alert
+    """
+
+    INFO = "info"
+    """
+    Translates to a blue alert
+    """
+
+    WARNING = "warning"
+    """
+    Translates to a yellow alert
+    """
+
+    DANGER = "danger"
+    """
+    Translates to a red alert
+    """

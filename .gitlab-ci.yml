@@ -37,6 +37,7 @@ unittest:
   stage: test
   tags: [docker]
   script:
+    - pip install -e .[flask,crypto]
     - python-unittest
 
 gitstats:
@@ -49,7 +50,7 @@ docgen:
   stage: stats
   tags: [docker]
   script:
-    - pip install flask
+    - pip install -e .[flask,crypto]
     - sphinx-docgen
 
 release_upload:

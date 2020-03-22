@@ -1,3 +1,5 @@
+V 0.9.0:
+  - Added flask module
 V 0.8.0:
   - Added env module
 V 0.7.0:

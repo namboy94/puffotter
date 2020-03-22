@@ -36,11 +36,24 @@ if __name__ == "__main__":
         license="GNU GPL3",
         packages=find_packages(),
         install_requires=[
-            "bcrypt",
             "sentry-sdk",
             "requests",
             "colorama"
         ],
+        extras_require={
+            "flask": [
+                "flask",
+                "flask-sqlalchemy",
+                "flask-login",
+                "cheroot",
+                "werkzeug",
+                "sentry-sdk[flask]",
+                "blinker"
+            ],
+            "crypto": [
+                "bcrypt"
+            ]
+        },
         test_suite='nose.collector',
         tests_require=['nose'],
         include_package_data=True,
