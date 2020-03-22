@@ -47,7 +47,8 @@ if __name__ == "__main__":
                 "flask-login",
                 "cheroot",
                 "werkzeug",
-                "sentry-sdk[flask]"
+                "sentry-sdk[flask]",
+                "blinker"
             ],
             "crypto": [
                 "bcrypt"
