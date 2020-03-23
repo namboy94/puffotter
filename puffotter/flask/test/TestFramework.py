@@ -21,7 +21,7 @@ import os
 import shutil
 from base64 import b64encode
 from unittest import TestCase
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict, List, Type, Callable
 from flask.blueprints import Blueprint
 from puffotter.crypto import generate_random, generate_hash
 from puffotter.flask.Config import Config
@@ -38,15 +38,15 @@ class _TestFramework(TestCase):
 
     module_name: str = "puffotter"
     models: List[db.Model] = []
-    blueprints: List[Blueprint] = []
+    blueprints: List[Tuple[Callable[[str], Blueprint], str]] = []
     root_path: str = "."
+    config: Type[Config] = Config
 
     def setUp(self):
         """
         Sets up the flask application and a temporary database to test with
         :return: None
         """
-        self.db_path = ""
         self.temp_templates_dir = "templates"
         self.templates_sample_dir = os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
@@ -55,9 +55,8 @@ class _TestFramework(TestCase):
         os.environ["FLASK_TESTING"] = "1"
         os.environ["FLASK_SECRET"] = generate_random(20)
 
+        self.cleanup(True)
         if self.module_name == "puffotter":
-            if os.path.isdir(self.temp_templates_dir):
-                shutil.rmtree(self.temp_templates_dir)
             shutil.copytree(self.templates_sample_dir, self.temp_templates_dir)
             os.environ["RECAPTCHA_SITE_KEY"] = ""
             os.environ["RECAPTCHA_SECRET_KEY"] = ""
@@ -68,20 +67,18 @@ class _TestFramework(TestCase):
         else:
             load_env_file()
 
-        Config.load_config(self.module_name, "")
+        self.config.load_config(self.root_path, self.module_name, "")
+        self.db_path = Config.DB_URI.split("sqlite:///")[1]
+        self.cleanup(False)
+
         self.app = app
         self.db = db
-        self.config = Config
-        self.db_path = Config.DB_URI.split("sqlite:///")[1]
-
-        if os.path.isfile(self.db_path):
-            os.remove(self.db_path)
 
         init_flask(
             self.module_name,
             "",
             self.root_path,
-            Config,
+            self.config,
             self.models,
             self.blueprints
         )
@@ -96,16 +93,19 @@ class _TestFramework(TestCase):
         post-test tasks
         :return: None
         """
-        self.cleanup()
+        self.cleanup(True)
 
-    def cleanup(self):
+    def cleanup(self, remove_templates: bool = True):
         """
         Cleans up the filesystem after/before tests
         :return: None
         """
-        if self.db_path != "" and os.path.isfile(self.db_path):
-            os.remove(self.db_path)
-        if os.path.isdir(self.temp_templates_dir):
+        try:
+            if self.db_path != "" and os.path.isfile(self.db_path):
+                os.remove(self.db_path)
+        except AttributeError:
+            pass
+        if os.path.isdir(self.temp_templates_dir) and remove_templates:
             shutil.rmtree(self.temp_templates_dir)
 
     def generate_sample_user(self, confirmed: bool = True) \

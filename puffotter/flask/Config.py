@@ -19,7 +19,7 @@ LICENSE"""
 
 import os
 import pkg_resources
-from typing import Type, Dict
+from typing import Type, Dict, Any, Callable
 
 
 class Config:
@@ -29,51 +29,63 @@ class Config:
     """
 
     @classmethod
-    def load_config(cls, module_name: str, sentry_dsn: str):
+    def load_config(cls, root_path: str, module_name: str, sentry_dsn: str):
         """
         Loads the configuration from environment variables
+        :param root_path: The root path of the application
         :param module_name: The name of the project's module
         :param sentry_dsn: The sentry DSN used for error logging
         :return: None
         """
-        Config.LOGGING_PATH = os.environ.get(
-            "LOGGING_PATH",
-            os.path.join("/tmp", f"{module_name}.log")
-        )
-        Config.SENTRY_DSN = sentry_dsn
-        Config.VERSION = pkg_resources.get_distribution(module_name).version
-        Config.FLASK_SECRET = os.environ["FLASK_SECRET"]
-        Config.TESTING = os.environ.get("FLASK_TESTING") == "1"
-
-        if Config.TESTING:
-            Config.DB_MODE = "sqlite"
-        else:
-            Config.DB_MODE = os.environ["DB_MODE"].lower()
-        if Config.DB_MODE == "sqlite":
-            sqlite_path = os.environ.get(
-                "SQLITE_PATH",
-                os.path.join("/tmp", f"{module_name}.db")
+        try:
+            Config.LOGGING_PATH = os.environ.get(
+                "LOGGING_PATH",
+                os.path.join("/tmp", f"{module_name}.log")
             )
-            Config.DB_URI = "sqlite:///" + sqlite_path
-        else:
-            base = Config.DB_MODE.upper() + "_"
-            db_host = os.environ[base + "HOST"]
-            db_port = os.environ[base + "PORT"]
-            db_user = os.environ[base + "USER"]
-            db_password = os.environ[base + "PASSWORD"]
-            db_database = os.environ[base + "DATABASE"]
-            Config.DB_URI = f"{Config.DB_MODE}://{db_user}:{db_password}@" \
-                            f"{db_host}:{db_port}/{db_database}"
+            Config.SENTRY_DSN = sentry_dsn
+            Config.VERSION = \
+                pkg_resources.get_distribution(module_name).version
+            Config.FLASK_SECRET = os.environ["FLASK_SECRET"]
+            Config.TESTING = os.environ.get("FLASK_TESTING") == "1"
 
-        Config.RECAPTCHA_SITE_KEY = os.environ["RECAPTCHA_SITE_KEY"]
-        Config.RECAPTCHA_SECRET_KEY = os.environ["RECAPTCHA_SECRET_KEY"]
+            if Config.TESTING:
+                Config.DB_MODE = "sqlite"
+            else:
+                Config.DB_MODE = os.environ["DB_MODE"].lower()
+            if Config.DB_MODE == "sqlite":
+                sqlite_path = os.environ.get(
+                    "SQLITE_PATH",
+                    os.path.join("/tmp", f"{module_name}.db")
+                )
+                Config.DB_URI = "sqlite:///" + sqlite_path
+            else:
+                base = Config.DB_MODE.upper() + "_"
+                db_host = os.environ[base + "HOST"]
+                db_port = os.environ[base + "PORT"]
+                db_user = os.environ[base + "USER"]
+                db_password = os.environ[base + "PASSWORD"]
+                db_database = os.environ[base + "DATABASE"]
+                Config.DB_URI = f"{Config.DB_MODE}://{db_user}:{db_password}@"\
+                                f"{db_host}:{db_port}/{db_database}"
 
-        Config.SMTP_HOST = os.environ["SMTP_HOST"]
-        Config.SMTP_PORT = int(os.environ["SMTP_PORT"])
-        Config.SMTP_ADDRESS = os.environ["SMTP_ADDRESS"]
-        Config.SMTP_PASSWORD = os.environ["SMTP_PASSWORD"]
+            Config.RECAPTCHA_SITE_KEY = os.environ["RECAPTCHA_SITE_KEY"]
+            Config.RECAPTCHA_SECRET_KEY = os.environ["RECAPTCHA_SECRET_KEY"]
 
-        Config._load_extras(Config)
+            Config.SMTP_HOST = os.environ["SMTP_HOST"]
+            Config.SMTP_PORT = int(os.environ["SMTP_PORT"])
+            Config.SMTP_ADDRESS = os.environ["SMTP_ADDRESS"]
+            Config.SMTP_PASSWORD = os.environ["SMTP_PASSWORD"]
+
+            cls._load_extras(Config)
+        except KeyError as e:
+            print(f"Missing environment variable: {e}")
+            exit(1)
+
+        for required_template in cls.REQUIRED_TEMPLATES.values():
+            path = os.path.join(root_path, "templates", required_template)
+            if not os.path.isfile(path):
+                print(f"Missing template file {path}")
+                exit(1)
 
     @classmethod
     def _load_extras(cls, parent: Type["Config"]):
@@ -169,6 +181,11 @@ class Config:
     The maximum age for API keys
     """
 
+    API_VERSION: str = "1"
+    """
+    The API Version
+    """
+
     REQUIRED_TEMPLATES: Dict[str, str] = {
         "index": "static/index.html",
         "about": "static/about.html",
@@ -217,4 +234,23 @@ class Config:
     """
     Dictionary that defines various strings used in the application.
     Makes it easier to use custom phrases.
+    """
+
+    TEMPLATE_EXTRAS: Dict[str, Callable[[], Dict[str, Any]]] = {
+        "index": lambda: {},
+        "about": lambda: {},
+        "privacy": lambda: {},
+        "login": lambda: {},
+        "register": lambda: {},
+        "forgot": lambda: {},
+        "profile": lambda: {},
+        "registration_email": lambda: {},
+        "forgot_email": lambda: {}
+    }
+    """
+    This can be used to provide the template rendering engine additional
+    parameters, which may be necessary when adding UI elements.
+    This is done with functions that don't expect any input and
+    return a dictionary of keys and values to be passed to the template
+    rendering engine
     """

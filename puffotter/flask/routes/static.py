@@ -20,32 +20,48 @@ LICENSE"""
 from typing import Union
 from flask import render_template, Blueprint
 from werkzeug import Response
+from puffotter.flask.Config import Config
 
-static_blueprint = Blueprint("static", __name__)
 
-
-@static_blueprint.route("/", methods=["GET"])
-def index() -> Union[Response, str]:
+def define_blueprint(blueprint_name: str) -> Blueprint:
     """
-    The index page
-    :return: The response
+    Defines the blueprint for this route
+    :param blueprint_name: The name of the blueprint
+    :return: The blueprint
     """
-    return render_template("static/index.html")
+    blueprint = Blueprint(blueprint_name, __name__)
 
+    @blueprint.route("/", methods=["GET"])
+    def index() -> Union[Response, str]:
+        """
+        The index page
+        :return: The response
+        """
+        return render_template(
+            "static/index.html",
+            **Config.TEMPLATE_EXTRAS["index"]()
+        )
 
-@static_blueprint.route("/about", methods=["GET"])
-def about() -> Union[Response, str]:
-    """
-    The about page/"Impressum" for the website
-    :return: The response
-    """
-    return render_template("static/about.html")
+    @blueprint.route("/about", methods=["GET"])
+    def about() -> Union[Response, str]:
+        """
+        The about page/"Impressum" for the website
+        :return: The response
+        """
+        return render_template(
+            "static/about.html",
+            **Config.TEMPLATE_EXTRAS["about"]()
+        )
 
+    @blueprint.route("/privacy", methods=["GET"])
+    def privacy() -> Union[Response, str]:
+        """
+        Page containing a privacy disclaimer
+        :return: The response
+        """
+        return render_template(
+            "static/privacy.html",
+            **Config.TEMPLATE_EXTRAS["privacy"]()
+        )
 
-@static_blueprint.route("/privacy", methods=["GET"])
-def privacy() -> Union[Response, str]:
-    """
-    Page containing a privacy disclaimer
-    :return: The response
-    """
-    return render_template("static/privacy.html")
+    return blueprint
