@@ -19,6 +19,8 @@ LICENSE"""
 
 import json
 from unittest.mock import patch
+from flask.blueprints import Blueprint
+from puffotter.flask.routes.decorators import api
 from puffotter.flask.test.TestFramework import _TestFramework
 
 
@@ -39,7 +41,7 @@ class TestApiCalls(_TestFramework):
         self.assertEqual(resp.status_code, 401)
         data = json.loads(resp.data.decode("utf-8"))
         self.assertEqual(data["status"], "error")
-        self.assertEqual(data["reason"], "Unauthorized")
+        self.assertEqual(data["reason"], "unauthorized")
 
     def test_non_base64_header(self):
         """
@@ -56,7 +58,7 @@ class TestApiCalls(_TestFramework):
         self.assertEqual(resp.status_code, 401)
         data = json.loads(resp.data.decode("utf-8"))
         self.assertEqual(data["status"], "error")
-        self.assertEqual(data["reason"], "Unauthorized")
+        self.assertEqual(data["reason"], "unauthorized")
 
     def test_expired_api_key(self):
         """
@@ -76,7 +78,7 @@ class TestApiCalls(_TestFramework):
         self.assertEqual(resp.status_code, 401)
         data = json.loads(resp.data.decode("utf-8"))
         self.assertEqual(data["status"], "error")
-        self.assertEqual(data["reason"], "Unauthorized")
+        self.assertEqual(data["reason"], "unauthorized")
 
     def test_using_non_json_data(self):
         """
@@ -91,7 +93,7 @@ class TestApiCalls(_TestFramework):
         self.assertEqual(resp.status_code, 400)
         data = json.loads(resp.data.decode("utf-8"))
         self.assertEqual(data["status"], "error")
-        self.assertEqual(data["reason"], "Not in JSON format")
+        self.assertEqual(data["reason"], "not in json format")
 
     def test_random_exception(self):
         """
@@ -113,4 +115,21 @@ class TestApiCalls(_TestFramework):
             self.assertEqual(resp.status_code, 400)
             data = json.loads(resp.data.decode("utf-8"))
             self.assertEqual(data["status"], "error")
-            self.assertEqual(data["reason"], "Bad Request: KeyError")
+            self.assertEqual(data["reason"], "bad request: KeyError")
+
+    def test_exception_in_api_route(self):
+        """
+        Tests if an exeption on an API route is correctly wrapped
+        in a JSON response
+        :return: None
+        """
+        bp = Blueprint("exceptiontest", __name__)
+
+        @bp.route("/api/exception", methods=["GET"])
+        @api
+        def exception_route():
+            return f"{1/0}"
+
+        self.app.register_blueprint(bp)
+        resp = self.client.get("/api/exception")
+        self.assertEqual(resp.status_code, 500)

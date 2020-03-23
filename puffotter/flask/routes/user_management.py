@@ -154,7 +154,6 @@ def define_blueprint(blueprint_name: str) -> Blueprint:
         elif not user.verify_confirmation(confirm_key):
             flash(Config.STRINGS["confirmation_key_invalid"], "warning")
         else:
-            print("D")
             user.confirmed = True
             db.session.commit()
             flash(Config.STRINGS["user_confirmed_successfully"], "success")
