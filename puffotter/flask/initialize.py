@@ -113,8 +113,10 @@ def __init_app(
     app.secret_key = config.FLASK_SECRET
     for blueprint_generator, blueprint_name in blueprint_generators:
         if blueprint_name in CREATED_BLUEPRINTS:
+            app.logger.debug(f"Blueprint {blueprint_name} already created")
             continue
         else:
+            app.logger.info(f"Creating blueprint {blueprint_name}")
             CREATED_BLUEPRINTS.append(blueprint_name)
             blueprint = blueprint_generator(blueprint_name)
             app.register_blueprint(blueprint)
@@ -147,6 +149,7 @@ def __init_app(
                     AlertSeverity.DANGER.value
                 )
                 return redirect(url_for("user_management.login"))
+            app.logger.warning("Caught HTTP exception: {}".format(e))
         else:
             error = HTTPException(config.STRINGS["500_message"])
             error.code = 500

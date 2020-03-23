@@ -23,6 +23,7 @@ from base64 import b64encode
 from unittest import TestCase
 from typing import Tuple, Dict, List, Type, Callable
 from flask.blueprints import Blueprint
+from flask_login import login_user
 from puffotter.crypto import generate_random, generate_hash
 from puffotter.flask.Config import Config
 from puffotter.flask.db.User import User
@@ -36,9 +37,23 @@ class _TestFramework(TestCase):
     Class that models a testing framework for the flask application
     """
 
+    GENERATED_USER_CREDENTIALS: List[Tuple[str, str, str, str]] = []
+    """
+    List of dynamically generated generated user credentials
+    (password, password hash, confirmation key, confirmation hash)
+    Used to increase speed of the tests, since hashing with bcrypt takes a
+    relatively long time
+    """
+
+    GENERATED_API_KEY_CREDENTIALS: List[Tuple[str, str]] = []
+    """
+    List of dynamically generated API keys and their hashes.
+    Used to speed up the testing
+    """
+
     module_name: str = "puffotter"
     models: List[db.Model] = []
-    blueprints: List[Tuple[Callable[[str], Blueprint], str]] = []
+    blueprint_generators: List[Tuple[Callable[[str], Blueprint], str]] = []
     root_path: str = "."
     config: Type[Config] = Config
 
@@ -47,6 +62,9 @@ class _TestFramework(TestCase):
         Sets up the flask application and a temporary database to test with
         :return: None
         """
+        self.user_cred_count = 0
+        self.api_cred_count = 0
+
         self.temp_templates_dir = "templates"
         self.templates_sample_dir = os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
@@ -80,7 +98,7 @@ class _TestFramework(TestCase):
             self.root_path,
             self.config,
             self.models,
-            self.blueprints
+            self.blueprint_generators
         )
         self.app.app_context().push()
 
@@ -115,30 +133,55 @@ class _TestFramework(TestCase):
         :param confirmed: Whether or not the user should be confirmed
         :return: The User object, the password and the confirmation key
         """
-        password = generate_random(20)
-        confirm_key = generate_random(20)
+        if self.user_cred_count >= \
+                len(_TestFramework.GENERATED_USER_CREDENTIALS):
+            password = generate_random(20)
+            password_hash = generate_hash(password)
+            confirm_key = generate_random(20)
+            confirmation_hash = generate_hash(confirm_key)
+            _TestFramework.GENERATED_USER_CREDENTIALS.append(
+                (password, password_hash, confirm_key, confirmation_hash)
+            )
+        else:
+            password, password_hash, confirm_key, confirmation_hash = \
+                _TestFramework.GENERATED_USER_CREDENTIALS[self.user_cred_count]
+        self.user_cred_count += 1
+
         user = User(
             username=generate_random(12),
-            password_hash=generate_hash(password),
+            password_hash=password_hash,
             email=generate_random(8) + "@example.com",
             confirmed=confirmed,
-            confirmation_hash=generate_hash(confirm_key)
+            confirmation_hash=confirmation_hash
         )
         self.db.session.add(user)
         self.db.session.commit()
         return user, password, confirm_key
 
-    def login_user(self, user: User, password: str):
+    def login_user(self, user: User, password: str, use_client: bool = True):
         """
         Logs in a user
         :param user: The user to log in
         :param password: The password to use
+        :param use_client: Whether or not to use the testing clienty
         :return: None
         """
-        self.client.post("/login", follow_redirects=True, data={
-            "username": user.username,
-            "password": password
-        })
+        if use_client:
+            self.client.post("/login", follow_redirects=True, data={
+                "username": user.username,
+                "password": password
+            })
+        else:
+            applicable_hashes = [
+                x[1]
+                for x in _TestFramework.GENERATED_USER_CREDENTIALS
+                if x[0] == password
+            ]
+            if user.password_hash not in applicable_hashes:
+                return
+            else:
+                with self.context:
+                    login_user(user)
 
     def generate_api_key(self, user: User) \
             -> Tuple[ApiKey, str, Dict[str, str]]:
@@ -147,8 +190,17 @@ class _TestFramework(TestCase):
         :param user: The user for which to create the key
         :return: The API key object, the actual API key, the headers
         """
-        key = generate_random(20)
-        hashed = generate_hash(key)
+        if self.api_cred_count >= \
+                len(_TestFramework.GENERATED_API_KEY_CREDENTIALS):
+            key = generate_random(20)
+            hashed = generate_hash(key)
+            _TestFramework.GENERATED_API_KEY_CREDENTIALS.append((key, hashed))
+        else:
+            key, hashed = _TestFramework.GENERATED_API_KEY_CREDENTIALS[
+                self.api_cred_count
+            ]
+        self.api_cred_count += 1
+
         api_key_obj = ApiKey(user=user, key_hash=hashed)
         self.db.session.add(api_key_obj)
         self.db.session.commit()

@@ -78,9 +78,9 @@ def define_blueprint(blueprint_name: str) -> Blueprint:
             _api_key = ApiKey.query.get(key.split(":", 1)[0])
 
             if _api_key is None:
-                raise ApiException("API key does not exist", 401)
+                raise ApiException("api key does not exist", 401)
             elif not _api_key.verify_key(key):
-                raise ApiException("API key not valid", 401)
+                raise ApiException("api key not valid", 401)
             else:
                 db.session.delete(_api_key)
                 db.session.commit()

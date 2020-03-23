@@ -44,15 +44,22 @@ def api(func: Callable) -> Callable:
         response = {"status": "ok"}
 
         try:
-            is_json = request.content_type.startswith("application/json") \
-                      and request.is_json \
-                      and isinstance(request.get_json(silent=True), dict)
+            is_json = request.content_type is not None \
+                and request.content_type.startswith("application/json") \
+                and request.is_json \
+                and isinstance(request.get_json(silent=True), dict)
             if request.method in ["POST", "PUT", "DELETE"] and not is_json:
-                raise ApiException(
-                    "Not in JSON format", 400
-                )
+                raise ApiException("not in json format", 400)
 
-            response["data"] = func(*args, **kwargs)
+            try:
+                response["data"] = func(*args, **kwargs)
+            except BaseException as e:
+                for error_type in [
+                    KeyError, TypeError, ValueError, ApiException
+                ]:
+                    if isinstance(e, error_type):
+                        raise e
+                raise ApiException("server error", 500)
 
         except (KeyError, TypeError, ValueError, ApiException) as e:
 
@@ -64,10 +71,9 @@ def api(func: Callable) -> Callable:
 
             else:
                 code = 400
-                response["reason"] = "Bad Request: {}".format(type(e).__name__)
+                response["reason"] = "bad request: {}".format(type(e).__name__)
 
         return make_response(jsonify(response), code)
-
     return wrapper
 
 
@@ -94,7 +100,7 @@ def api_login_required(func: Callable) -> Callable:
             return resp
         except Unauthorized:
             return make_response(
-                jsonify({"status": "error", "reason": "Unauthorized"}), 401
+                jsonify({"status": "error", "reason": "unauthorized"}), 401
             )
 
     return wrapper
