@@ -1,6 +1,7 @@
 V 0.9.2:
   - Added ways to add more variables to template rendering for default routes
   - Fixed loading extra config data
+  - Fixed issues with flask while testing due to import side effects
 V 0.9.1:
   - Fixed errors when missing recaptcha string in form
 V 0.9.0:
