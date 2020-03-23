@@ -17,13 +17,12 @@ You should have received a copy of the GNU General Public License
 along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-import os
 import base64
 import binascii
 import logging
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
-from typing import List, Optional, Type
+from typing import List, Optional, Type, Callable, Tuple
 from flask import redirect, url_for, flash, render_template
 from flask.logging import default_handler
 from flask.blueprints import Blueprint
@@ -33,10 +32,16 @@ from puffotter.flask.base import app, login_manager, db
 from puffotter.flask.enums import AlertSeverity
 from puffotter.flask.db.User import User
 from puffotter.flask.db.ApiKey import ApiKey
-from puffotter.flask.routes.user_management import user_management_blueprint
-from puffotter.flask.routes.static import static_blueprint
-from puffotter.flask.routes.api.user_management import \
-    user_management_api_blueprint
+from puffotter.flask.routes import blueprint_generators \
+    as default_blueprint_generators
+
+
+CREATED_BLUEPRINTS = []
+"""
+Keeps track of created blueprint names.
+This is necessary for unit testing with nose, because duplicate blueprint names
+will cause errors.
+"""
 
 
 def init_flask(
@@ -45,7 +50,7 @@ def init_flask(
         root_path: str,
         config: Type[Config],
         models: List[Type[db.Model]],
-        blueprints: List[Blueprint]
+        blueprint_generators: List[Tuple[Callable[[str], Blueprint], str]]
 ):
     """
     Initializes the flask application
@@ -54,38 +59,20 @@ def init_flask(
     :param root_path: The root path of the flask application
     :param config: The Config class to use for configuration
     :param models: The database models to create
-    :param blueprints: The routing blueprints to register
+    :param blueprint_generators: Tuples that contain a function that generates
+                                 a blueprint and the name of the blueprint
     :return: None
     """
     app.root_path = root_path
-    try:
-        config.load_config(module_name, sentry_dsn)
-        missing_variable = None
-    except KeyError as e:
-        missing_variable = e
-
+    config.load_config(root_path, module_name, sentry_dsn)
     __init_logging(config)
-    if missing_variable is not None:
-        app.logger.error(f"Missing environment variable: {missing_variable}")
-        exit(1)
 
-    for required_template in config.REQUIRED_TEMPLATES.values():
-        path = os.path.join(app.root_path, "templates", required_template)
-        if not os.path.isfile(path):
-            app.logger.error(f"Missing template file {path}")
-            exit(1)
-
-    default_blueprints = [
-        static_blueprint,
-        user_management_blueprint,
-        user_management_api_blueprint
-    ]
     default_models = [
         User,
         ApiKey
     ]
 
-    __init_app(config, default_blueprints + blueprints)
+    __init_app(config, default_blueprint_generators + blueprint_generators)
     __init_db(config, default_models + models)
     __init_login_manager()
 
@@ -110,18 +97,27 @@ def __init_logging(config: Type[Config]):
     app.logger.info("STARTING FLASK")
 
 
-def __init_app(config: Type[Config], blueprints: List[Blueprint]):
+def __init_app(
+        config: Type[Config],
+        blueprint_generators: List[Tuple[Callable[[str], Blueprint], str]]
+):
     """
     Initializes the flask app
     :param config: The configuration to use
-    :param blueprints: The routing blueprints to register
+    :param blueprint_generators: Tuples that contain a function that generates
+                                 a blueprint and the name of the blueprint
     :return: None
     """
     app.testing = config.TESTING
     app.config["TRAP_HTTP_EXCEPTIONS"] = True
     app.secret_key = config.FLASK_SECRET
-    for blueprint in blueprints:
-        app.register_blueprint(blueprint)
+    for blueprint_generator, blueprint_name in blueprint_generators:
+        if blueprint_name in CREATED_BLUEPRINTS:
+            continue
+        else:
+            CREATED_BLUEPRINTS.append(blueprint_name)
+            blueprint = blueprint_generator(blueprint_name)
+            app.register_blueprint(blueprint)
 
     @app.context_processor
     def inject_template_variables():

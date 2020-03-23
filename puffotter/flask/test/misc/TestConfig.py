@@ -40,7 +40,7 @@ class TestConfig(_TestFramework):
         os.environ["MYSQL_HOST"] = "ghi"
         os.environ["MYSQL_PORT"] = "1000"
         os.environ["MYSQL_DATABASE"] = "xyz"
-        Config.load_config("puffotter", "sentry_dsn")
+        Config.load_config(self.root_path, "puffotter", "sentry_dsn")
         self.assertEqual(Config.DB_URI, "mysql://abc:def@ghi:1000/xyz")
 
     def test_version(self):

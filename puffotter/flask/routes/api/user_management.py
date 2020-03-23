@@ -28,67 +28,73 @@ from puffotter.flask.db.ApiKey import ApiKey
 from puffotter.flask.exceptions import ApiException
 from puffotter.flask.routes.decorators import api, api_login_required
 
-user_management_api_blueprint = Blueprint("user_management_api", __name__)
 
-
-@user_management_api_blueprint.route(
-    "/api/v1/key", methods=["POST", "DELETE"]
-)
-@api
-def api_key() -> Dict[str, Any]:
+def define_blueprint(blueprint_name: str) -> Blueprint:
     """
-    Allows users to request a new API key or revoke an existing API key
-    :return: The JSON response
+    Defines the blueprint for this route
+    :param blueprint_name: The name of the blueprint
+    :return: The blueprint
     """
-    data = request.get_json()
-    if request.method == "POST":
-        username = data["username"]
-        password = data["password"]
-        user = User.query.filter_by(username=username).first()
+    blueprint = Blueprint(blueprint_name, __name__)
+    api_base = f"/api/v{Config.API_VERSION}"
 
-        if user is None:
-            raise ApiException("user does not exist", 401)
-        elif not user.confirmed:
-            raise ApiException("user is not confirmed", 401)
-        elif not user.verify_password(password):
-            raise ApiException("password is incorrect", 401)
-        else:
-            key = generate_random(32)
-            hashed = generate_hash(key)
-            _api_key = ApiKey(user=user, key_hash=hashed)
-            db.session.add(_api_key)
-            db.session.commit()
+    @blueprint.route(f"{api_base}/key", methods=["POST", "DELETE"])
+    @api
+    def api_key() -> Dict[str, Any]:
+        """
+        Allows users to request a new API key or revoke an existing API key
+        :return: The JSON response
+        """
+        data = request.get_json()
+        if request.method == "POST":
+            username = data["username"]
+            password = data["password"]
+            user = User.query.filter_by(username=username).first()
 
-            return {
-                "api_key": "{}:{}".format(_api_key.id, key),
-                "expiration": (
-                        int(_api_key.creation_time)
-                        + Config.MAX_API_KEY_AGE
-                ),
-                "user": user.__json__(True)
-            }
+            if user is None:
+                raise ApiException("user does not exist", 401)
+            elif not user.confirmed:
+                raise ApiException("user is not confirmed", 401)
+            elif not user.verify_password(password):
+                raise ApiException("password is incorrect", 401)
+            else:
+                key = generate_random(32)
+                hashed = generate_hash(key)
+                _api_key = ApiKey(user=user, key_hash=hashed)
+                db.session.add(_api_key)
+                db.session.commit()
 
-    else:  # request.method == "DELETE"
-        key = data["api_key"]
-        _api_key = ApiKey.query.get(key.split(":", 1)[0])
+                return {
+                    "api_key": "{}:{}".format(_api_key.id, key),
+                    "expiration": (
+                            int(_api_key.creation_time)
+                            + Config.MAX_API_KEY_AGE
+                    ),
+                    "user": user.__json__(True)
+                }
 
-        if _api_key is None:
-            raise ApiException("API key does not exist", 401)
-        elif not _api_key.verify_key(key):
-            raise ApiException("API key not valid", 401)
-        else:
-            db.session.delete(_api_key)
-            db.session.commit()
-            return {}
+        else:  # request.method == "DELETE"
+            key = data["api_key"]
+            _api_key = ApiKey.query.get(key.split(":", 1)[0])
 
+            if _api_key is None:
+                raise ApiException("API key does not exist", 401)
+            elif not _api_key.verify_key(key):
+                raise ApiException("API key not valid", 401)
+            else:
+                db.session.delete(_api_key)
+                db.session.commit()
+                return {}
 
-@user_management_api_blueprint.route("/api/v1/authorize", methods=["GET"])
-@api_login_required
-@login_required
-@api
-def api_authorize() -> Dict[str, Any]:
-    """
-    Allows a user to check if an API key is authorized or not
-    :return: None
-    """
-    return {}  # Checks done by @login_required
+    @blueprint.route(f"{api_base}/authorize", methods=["GET"])
+    @api_login_required
+    @login_required
+    @api
+    def api_authorize() -> Dict[str, Any]:
+        """
+        Allows a user to check if an API key is authorized or not
+        :return: None
+        """
+        return {}  # Checks done by @login_required
+
+    return blueprint
