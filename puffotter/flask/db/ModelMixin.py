@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with bundesliga-tippspiel.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
+from enum import Enum
 from typing import Dict, Any
 from puffotter.flask.base import db
 
@@ -41,6 +42,8 @@ class ModelMixin:
                                  included or if they're limited to IDs
         :return: A dictionary representing the model's values
         """
+        # TODO Make this automated.
+        # repr and str both depend on this being implemented correctly.
         raise NotImplementedError()  # pragma: no cover
 
     def __str__(self) -> str:
@@ -56,9 +59,20 @@ class ModelMixin:
         :return: A string with which the object may be generated
         """
         params = ""
+        json_repr = self.__json__()
+
+        enums = {}
+        for key in json_repr:
+            attr = getattr(self, key)
+            if isinstance(attr, Enum):
+                enum_cls = attr.__class__.__name__
+                enum_val = attr.name
+                enums[key] = "{}.{}".format(enum_cls, enum_val)
 
         for key, val in self.__json__().items():
-            params += "{}={}, ".format(key, repr(val))
+            repr_arg = enums.get(key, repr(val))
+            params += "{}={}, ".format(key, repr_arg)
+
         params = params.rsplit(",", 1)[0]
 
         return "{}({})".format(self.__class__.__name__, params)
