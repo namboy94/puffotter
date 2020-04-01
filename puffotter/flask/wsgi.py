@@ -18,6 +18,7 @@ along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 import time
+import sentry_sdk
 from threading import Thread
 from typing import Callable, Tuple, Dict, Type
 from cheroot.wsgi import Server, PathInfoDispatcher
@@ -47,6 +48,7 @@ def __start_background_tasks(
                 except Exception as error:
                     app.logger.error(f"Encountered exception in "
                                      f"background task {_name}: {error}")
+                    sentry_sdk.capture_exception(error)
                 time.sleep(_delay)
         return Thread(target=run_task)
 
