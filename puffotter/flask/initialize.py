@@ -154,6 +154,7 @@ def __init_app(
             error = HTTPException(config.STRINGS["500_message"])
             error.code = 500
             app.logger.error("Caught exception: {}".format(e))
+            sentry_sdk.capture_exception(e)
         return render_template(
             config.REQUIRED_TEMPLATES["error_page"],
             error=error
