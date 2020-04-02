@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
+import sys
 import base64
 import binascii
 import logging
@@ -89,10 +90,25 @@ def __init_logging(config: Type[Config]):
     )
 
     app.logger.removeHandler(default_handler)
+
+    log_format = \
+        "[%(asctime)s, %(levelname)s] %(module)s[%(lineno)d]: %(message)s"
+    formatter = logging.Formatter(log_format)
+
+    info_handler = logging.FileHandler(config.LOGGING_PATH)
+    info_handler.setLevel(logging.INFO)
+    info_handler.setFormatter(formatter)
+
+    debug_handler = logging.FileHandler(config.DEBUG_LOGGING_PATH)
+    debug_handler.setLevel(logging.DEBUG)
+    debug_handler.setFormatter(formatter)
+
+    app.logger.addHandler(info_handler)
+    app.logger.addHandler(debug_handler)
+
     logging.basicConfig(
-        filename=config.LOGGING_PATH,
         level=logging.DEBUG,
-        format="[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
+        format=log_format
     )
     app.logger.info("STARTING FLASK")
 
