@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-import sys
 import base64
 import binascii
 import logging
