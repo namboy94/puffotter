@@ -42,6 +42,10 @@ class Config:
                 "LOGGING_PATH",
                 os.path.join("/tmp", f"{module_name}.log")
             )
+            Config.DEBUG_LOGGING_PATH = os.environ.get(
+                "DEBUG_LOGGING_PATH",
+                os.path.join("/tmp", f"{module_name}-debug.log")
+            )
             Config.SENTRY_DSN = sentry_dsn
             Config.VERSION = \
                 pkg_resources.get_distribution(module_name).version
@@ -120,6 +124,16 @@ class Config:
     LOGGING_PATH: str
     """
     The path to the logging file
+    """
+
+    DEBUG_LOGGING_PATH: str
+    """
+    The path to the debug logging path
+    """
+
+    WARNING_LOGGING_PATH: str
+    """
+    The path to the logging path for WARNING messages
     """
 
     FLASK_PORT: int = int(os.environ.get("FLASK_PORT", "8000"))
