@@ -1,3 +1,5 @@
+V 0.9.6:
+  - Added domain name to flask config
 V 0.9.5:
   - Enhanced flask logging
 V 0.9.4:

@@ -141,6 +141,11 @@ class Config:
     The port to use when serving the flask application
     """
 
+    DOMAIN_NAME: str = os.environ.get("DOMAIN_NAME", "localhost")
+    """
+    The domain name of the website
+    """
+
     DB_MODE: str
     """
     The database mode (for example 'sqlite' or 'mysql')
