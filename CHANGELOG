@@ -1,3 +1,5 @@
+V 0.10.1:
+  - Don't activate telegram when testing
 V 0.10.0:
   - Added specification for environment variables in flask framework
   - Added telegram bot capabilities to flask framework

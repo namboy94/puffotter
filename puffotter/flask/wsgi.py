@@ -75,7 +75,7 @@ def start_server(
                                   executes the task
     :return: None
     """
-    if not config.TELEGRAM_API_KEY == "":
+    if not config.TELEGRAM_API_KEY == "" and not config.TESTING:
         config.initialize_telegram()
         task_definitions.update({
             "telegram_bg": (1, config.telegram_bg)
