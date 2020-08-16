@@ -32,6 +32,7 @@ from puffotter.flask.base import app, login_manager, db
 from puffotter.flask.enums import AlertSeverity
 from puffotter.flask.db.User import User
 from puffotter.flask.db.ApiKey import ApiKey
+from puffotter.flask.db.TelegramChatId import TelegramChatId
 from puffotter.flask.routes import blueprint_generators \
     as default_blueprint_generators
 
@@ -69,7 +70,8 @@ def init_flask(
 
     default_models = [
         User,
-        ApiKey
+        ApiKey,
+        TelegramChatId
     ]
 
     __init_app(config, default_blueprint_generators + blueprint_generators)

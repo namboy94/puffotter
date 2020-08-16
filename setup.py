@@ -48,7 +48,8 @@ if __name__ == "__main__":
                 "cheroot",
                 "werkzeug",
                 "sentry-sdk[flask]",
-                "blinker"
+                "blinker",
+                "bokkichat"
             ],
             "crypto": [
                 "bcrypt"
