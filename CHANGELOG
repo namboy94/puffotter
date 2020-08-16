@@ -2,6 +2,7 @@ V 0.10.0:
   - Added specification for environment variables in flask framework
   - Added telegram bot capabilities to flask framework
   - Added URL path capabilities to flask framework
+  - Added environment variable dumping capabilities to flask framework
 V 0.9.6:
   - Added domain name to flask config
 V 0.9.5:
