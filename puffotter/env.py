@@ -23,7 +23,7 @@ import os
 def load_env_file(path: str = ".env"):
     """
     Loads an environment file into os.environ
-    :param path: THe path to the environment file
+    :param path: The path to the environment file
     :return: None
     """
     if os.path.isfile(path):
