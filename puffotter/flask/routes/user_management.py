@@ -291,6 +291,7 @@ def define_blueprint(blueprint_name: str) -> Blueprint:
         db.session.commit()
 
         flash(Config.STRINGS["telegram_chat_id_set"], "success")
+        chat_id.send_message(Config.STRINGS["telegram_chat_id_set"])
         return redirect(url_for("user_management.profile"))
 
     return blueprint
