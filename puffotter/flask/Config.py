@@ -125,7 +125,7 @@ class Config:
             "SMTP_ADDRESS",
             "SMTP_PASSWORD",
             "DOMAIN_NAME",
-            "HTTP_PORT",
+            "FLASK_PORT",
             "TELEGRAM_API_KEY"
         ]
         optional = [
@@ -189,7 +189,7 @@ class Config:
         if cls.BEHIND_PROXY:
             return f"https://{cls.DOMAIN_NAME}"
         else:
-            return f"http://{cls.DOMAIN_NAME}:{cls.HTTP_PORT}"
+            return f"http://{cls.DOMAIN_NAME}:{cls.FLASK_PORT}"
 
     @classmethod
     def initialize_telegram(cls):
@@ -318,17 +318,7 @@ class Config:
     Telegram bot connection
     """
 
-    DOMAIN_NAME: str
-    """
-    The name of the domain the website is running on
-    """
-
-    HTTP_PORT: str
-    """
-    The port on which the website is server
-    """
-
-    BEHIND_PROXY: str
+    BEHIND_PROXY: bool
     """
     Whether or not the site is being served by a reverse proxy like nginx.
     """

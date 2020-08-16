@@ -83,8 +83,6 @@ class _TestFramework(TestCase):
             os.environ["SMTP_PORT"] = "0"
             os.environ["SMTP_ADDRESS"] = ""
             os.environ["SMTP_PASSWORD"] = ""
-            os.environ["HTTP_PORT"] = "80"
-            os.environ["DOMAIN_NAME"] = "example.com"
             os.environ["TELEGRAM_API_KEY"] = ""
         else:
             load_env_file()
