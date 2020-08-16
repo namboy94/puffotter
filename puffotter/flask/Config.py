@@ -122,14 +122,14 @@ class Config:
             "SMTP_PORT",
             "SMTP_ADDRESS",
             "SMTP_PASSWORD",
-            "DOMAIN_NAME",
-            "FLASK_PORT",
             "TELEGRAM_API_KEY"
         ]
         optional = [
             "LOGGING_PATH",
             "DEBUG_LOGGING_PATH",
             "FLASK_TESTING",
+            "DOMAIN_NAME",
+            "FLASK_PORT",
             "BEHIND_PROXY"
         ]
 
