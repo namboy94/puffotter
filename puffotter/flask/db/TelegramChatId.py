@@ -19,16 +19,17 @@ LICENSE"""
 
 import time
 from typing import Dict, Any
+from bokkichat.entities.Address import Address
+from bokkichat.entities.message.TextMessage import TextMessage
 from puffotter.flask.base import db
 from puffotter.flask.Config import Config
 from puffotter.flask.db.ModelMixin import ModelMixin
-from puffotter.crypto import verify_password
 
 
-class ApiKey(ModelMixin, db.Model):
+class TelegramChatId(ModelMixin, db.Model):
     """
-    Model that describes the 'api_keys' SQL table
-    An ApiKey is used for API access using HTTP basic auth
+    Model that describes the 'telegram_chat_ids' SQL table
+    Maps telegram chat ids to users
     """
 
     def __init__(self, *args, **kwargs):
@@ -39,7 +40,7 @@ class ApiKey(ModelMixin, db.Model):
         """
         super().__init__(*args, **kwargs)
 
-    __tablename__ = "api_keys"
+    __tablename__ = "telegram_chat_ids"
     """
     The name of the table
     """
@@ -51,19 +52,19 @@ class ApiKey(ModelMixin, db.Model):
         nullable=False
     )
     """
-    The ID of the user associated with this API key
+    The ID of the user associated with this telegram chat ID
     """
 
-    user = db.relationship(
-        "User", backref=db.backref("api_keys", lazy=True, cascade="all,delete")
-    )
+    user = db.relationship("User", backref=db.backref(
+        "telegram_chat_ids", lazy=True, cascade="all,delete"
+    ))
     """
-    The user associated with this API key
+    The user associated with this telegram chat ID
     """
 
-    key_hash = db.Column(db.String(255), nullable=False)
+    chat_id = db.Column(db.String(255), nullable=False)
     """
-    The hash of the API key
+    The telegram chat ID
     """
 
     creation_time = db.Column(db.Integer, nullable=False, default=time.time)
@@ -71,28 +72,19 @@ class ApiKey(ModelMixin, db.Model):
     The time at which this API key was created as a UNIX timestamp
     """
 
-    def has_expired(self) -> bool:
+    def send_message(self, message_text: str):
         """
-        Checks if the API key has expired.
-        API Keys expire after 30 days
-        :return: True if the key has expired, False otherwise
+        Sends a message to the telegram chat
+        :param message_text: The message text to send
+        :return: None
         """
-        return time.time() - self.creation_time > Config.MAX_API_KEY_AGE
-
-    def verify_key(self, key: str) -> bool:
-        """
-        Checks if a given key is valid
-        :param key: The key to check
-        :return: True if the key is valid, False otherwise
-        """
-        try:
-            _id, api_key = key.split(":", 1)
-            if int(_id) != self.id:
-                return False
-            else:
-                return verify_password(api_key, self.key_hash)
-        except ValueError:
-            return False
+        address = Address(self.chat_id)
+        message = TextMessage(
+            Config.TELEGRAM_BOT_CONNECTION.address,
+            address,
+            message_text
+        )
+        Config.TELEGRAM_BOT_CONNECTION.send(message)
 
     def __json__(self, include_children: bool = False) -> Dict[str, Any]:
         """
@@ -104,7 +96,7 @@ class ApiKey(ModelMixin, db.Model):
         data = {
             "id": self.id,
             "user_id": self.user_id,
-            "creation_time": self.creation_time
+            "chat_id": self.chat_id
         }
         if include_children:
             data["user"] = self.user.__json__(include_children)

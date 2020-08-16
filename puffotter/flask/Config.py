@@ -384,7 +384,8 @@ class Config:
         "password_reset_email_title": "Password Reset",
         "password_was_reset": "Password was reset successfully",
         "password_changed": "Password changed successfully",
-        "user_was_deleted": "User was deleted"
+        "user_was_deleted": "User was deleted",
+        "telegram_chat_id_set": "Telegram Chat ID was set"
     }
     """
     Dictionary that defines various strings used in the application.

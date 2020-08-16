@@ -9,6 +9,7 @@ from puffotter.smtp import send_email
 from puffotter.flask.base import app, db
 from puffotter.flask.Config import Config
 from puffotter.flask.db.User import User
+from puffotter.flask.db.TelegramChatId import TelegramChatId
 
 
 def define_blueprint(blueprint_name: str) -> Blueprint:
@@ -267,6 +268,27 @@ def define_blueprint(blueprint_name: str) -> Blueprint:
             logout_user()
             flash(Config.STRINGS["user_was_deleted"], "success")
             return redirect(url_for("static.index"))
+        return redirect(url_for("user_management.profile"))
+
+    @blueprint.route("/register_telegram", methods=["POST"])
+    @login_required
+    def register_telegram() -> Union[Response, str]:
+        """
+        Allows the user to register a telegram chat ID
+        :return: The response
+        """
+        telegram_chat_id = request.form["telegram_chat_id"]
+        user: User = current_user
+        chat_id = TelegramChatId.query.filter_by(user=user).first()
+
+        if chat_id is None:
+            chat_id = TelegramChatId(user=user, chat_id=telegram_chat_id)
+            db.session.add(chat_id)
+        else:
+            chat_id.chat_id = telegram_chat_id
+        db.session.commit()
+
+        flash(Config.STRINGS["telegram_chat_id_set"], "success")
         return redirect(url_for("user_management.profile"))
 
     return blueprint
