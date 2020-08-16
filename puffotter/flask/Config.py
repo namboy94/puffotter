@@ -129,7 +129,7 @@ class Config:
             "DEBUG_LOGGING_PATH",
             "FLASK_TESTING",
             "DOMAIN_NAME",
-            "FLASK_PORT",
+            "HTTP_PORT",
             "BEHIND_PROXY"
         ]
 
@@ -187,7 +187,7 @@ class Config:
         if cls.BEHIND_PROXY:
             return f"https://{cls.DOMAIN_NAME}"
         else:
-            return f"http://{cls.DOMAIN_NAME}:{cls.FLASK_PORT}"
+            return f"http://{cls.DOMAIN_NAME}:{cls.HTTP_PORT}"
 
     @classmethod
     def initialize_telegram(cls):
@@ -257,7 +257,7 @@ class Config:
     The path to the logging path for WARNING messages
     """
 
-    FLASK_PORT: int = int(os.environ.get("FLASK_PORT", "8000"))
+    HTTP_PORT: int = int(os.environ.get("HTTP_PORT", "80"))
     """
     The port to use when serving the flask application
     """

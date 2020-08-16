@@ -222,9 +222,11 @@ def define_blueprint(blueprint_name: str) -> Blueprint:
         Allows a user to edit their profile details
         :return: The response
         """
+        chat_id = TelegramChatId.query.filter_by(user=current_user).first()
         return render_template(
             "user_management/profile.html",
-            **Config.TEMPLATE_EXTRAS["profile"]()
+            **Config.TEMPLATE_EXTRAS["profile"](),
+            telegram_chat_id=chat_id
         )
 
     @blueprint.route("/change_password", methods=["POST"])

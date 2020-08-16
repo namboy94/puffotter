@@ -83,7 +83,7 @@ def start_server(
     __start_background_tasks(task_definitions)
 
     server = Server(
-        ("0.0.0.0", config.FLASK_PORT),
+        ("0.0.0.0", config.HTTP_PORT),
         PathInfoDispatcher({"/": app})
     )
 
