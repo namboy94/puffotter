@@ -19,7 +19,7 @@ LICENSE"""
 
 import os
 import pkg_resources
-from typing import Type, Dict, Any, Callable, List
+from typing import Type, Dict, Any, Callable, List, Optional
 from bokkichat.entities.message.TextMessage import TextMessage
 from bokkichat.settings.impl.TelegramBotSettings import TelegramBotSettings
 from bokkichat.connection.impl.TelegramBotConnection import \
@@ -162,10 +162,11 @@ class Config:
                 exit(1)
 
     @classmethod
-    def dump_env_variables(cls, path: str):
+    def dump_env_variables(cls, path: Optional[str] = None):
         """
         Dumps all environment variables used by this application to a file
-        :param path: The path to the file to which to dump the content
+        :param path: The path to the file to which to dump the content.
+                     If this is None, the file contents will be printed.
         :return: None
         """
         envs = ""
@@ -176,8 +177,11 @@ class Config:
             if value is not None:
                 envs += f"{env_name}={value}\n"
 
-        with open(path, "w") as f:
-            f.write(envs)
+        if path is not None:
+            with open(path, "w") as f:
+                f.write(envs)
+        else:
+            print(envs)
 
     @classmethod
     def base_url(cls) -> str:
