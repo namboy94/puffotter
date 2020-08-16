@@ -75,6 +75,11 @@ def start_server(
                                   executes the task
     :return: None
     """
+    if not config.TELEGRAM_API_KEY == "":
+        config.initialize_telegram()
+        task_definitions.update({
+            "telegram_bg": (1, config.telegram_bg)
+        })
     __start_background_tasks(task_definitions)
 
     server = Server(

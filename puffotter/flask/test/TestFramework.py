@@ -71,6 +71,7 @@ class _TestFramework(TestCase):
             "templates"
         )
         os.environ["FLASK_TESTING"] = "1"
+        os.environ["DB_MODE"] = "sqlite"
         os.environ["FLASK_SECRET"] = generate_random(20)
 
         self.cleanup(True)
@@ -82,6 +83,9 @@ class _TestFramework(TestCase):
             os.environ["SMTP_PORT"] = "0"
             os.environ["SMTP_ADDRESS"] = ""
             os.environ["SMTP_PASSWORD"] = ""
+            os.environ["HTTP_PORT"] = "80"
+            os.environ["DOMAIN_NAME"] = "example.com"
+            os.environ["TELEGRAM_API_KEY"] = ""
         else:
             load_env_file()
 

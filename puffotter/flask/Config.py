@@ -19,7 +19,11 @@ LICENSE"""
 
 import os
 import pkg_resources
-from typing import Type, Dict, Any, Callable
+from typing import Type, Dict, Any, Callable, List
+from bokkichat.entities.message.TextMessage import TextMessage
+from bokkichat.settings.impl.TelegramBotSettings import TelegramBotSettings
+from bokkichat.connection.impl.TelegramBotConnection import \
+    TelegramBotConnection
 
 
 class Config:
@@ -37,53 +41,55 @@ class Config:
         :param sentry_dsn: The sentry DSN used for error logging
         :return: None
         """
-        try:
-            Config.LOGGING_PATH = os.environ.get(
-                "LOGGING_PATH",
-                os.path.join("/tmp", f"{module_name}.log")
+        cls.ensure_environment_variables_present()
+
+        Config.DOMAIN_NAME = os.environ["DOMAIN_NAME"]
+        Config.HTTP_PORT = os.environ["HTTP_PORT"]
+        Config.BEHIND_PROXY = os.environ.get("BEHIND_PROXY") == "1"
+        Config.LOGGING_PATH = os.environ.get(
+            "LOGGING_PATH",
+            os.path.join("/tmp", f"{module_name}.log")
+        )
+        Config.DEBUG_LOGGING_PATH = os.environ.get(
+            "DEBUG_LOGGING_PATH",
+            os.path.join("/tmp", f"{module_name}-debug.log")
+        )
+        Config.SENTRY_DSN = sentry_dsn
+        Config.VERSION = \
+            pkg_resources.get_distribution(module_name).version
+        Config.FLASK_SECRET = os.environ["FLASK_SECRET"]
+        Config.TESTING = os.environ.get("FLASK_TESTING") == "1"
+
+        if Config.TESTING:
+            Config.DB_MODE = "sqlite"
+        else:
+            Config.DB_MODE = os.environ["DB_MODE"].lower()
+        if Config.DB_MODE == "sqlite":
+            sqlite_path = os.environ.get(
+                "SQLITE_PATH",
+                os.path.join("/tmp", f"{module_name}.db")
             )
-            Config.DEBUG_LOGGING_PATH = os.environ.get(
-                "DEBUG_LOGGING_PATH",
-                os.path.join("/tmp", f"{module_name}-debug.log")
-            )
-            Config.SENTRY_DSN = sentry_dsn
-            Config.VERSION = \
-                pkg_resources.get_distribution(module_name).version
-            Config.FLASK_SECRET = os.environ["FLASK_SECRET"]
-            Config.TESTING = os.environ.get("FLASK_TESTING") == "1"
+            Config.DB_URI = "sqlite:///" + sqlite_path
+        else:
+            base = Config.DB_MODE.upper() + "_"
+            db_host = os.environ[base + "HOST"]
+            db_port = os.environ[base + "PORT"]
+            db_user = os.environ[base + "USER"]
+            db_password = os.environ[base + "PASSWORD"]
+            db_database = os.environ[base + "DATABASE"]
+            Config.DB_URI = f"{Config.DB_MODE}://{db_user}:{db_password}@"\
+                            f"{db_host}:{db_port}/{db_database}"
 
-            if Config.TESTING:
-                Config.DB_MODE = "sqlite"
-            else:
-                Config.DB_MODE = os.environ["DB_MODE"].lower()
-            if Config.DB_MODE == "sqlite":
-                sqlite_path = os.environ.get(
-                    "SQLITE_PATH",
-                    os.path.join("/tmp", f"{module_name}.db")
-                )
-                Config.DB_URI = "sqlite:///" + sqlite_path
-            else:
-                base = Config.DB_MODE.upper() + "_"
-                db_host = os.environ[base + "HOST"]
-                db_port = os.environ[base + "PORT"]
-                db_user = os.environ[base + "USER"]
-                db_password = os.environ[base + "PASSWORD"]
-                db_database = os.environ[base + "DATABASE"]
-                Config.DB_URI = f"{Config.DB_MODE}://{db_user}:{db_password}@"\
-                                f"{db_host}:{db_port}/{db_database}"
+        Config.RECAPTCHA_SITE_KEY = os.environ["RECAPTCHA_SITE_KEY"]
+        Config.RECAPTCHA_SECRET_KEY = os.environ["RECAPTCHA_SECRET_KEY"]
 
-            Config.RECAPTCHA_SITE_KEY = os.environ["RECAPTCHA_SITE_KEY"]
-            Config.RECAPTCHA_SECRET_KEY = os.environ["RECAPTCHA_SECRET_KEY"]
+        Config.SMTP_HOST = os.environ["SMTP_HOST"]
+        Config.SMTP_PORT = int(os.environ["SMTP_PORT"])
+        Config.SMTP_ADDRESS = os.environ["SMTP_ADDRESS"]
+        Config.SMTP_PASSWORD = os.environ["SMTP_PASSWORD"]
+        Config.TELEGRAM_API_KEY = os.environ["TELEGRAM_API_KEY"]
 
-            Config.SMTP_HOST = os.environ["SMTP_HOST"]
-            Config.SMTP_PORT = int(os.environ["SMTP_PORT"])
-            Config.SMTP_ADDRESS = os.environ["SMTP_ADDRESS"]
-            Config.SMTP_PASSWORD = os.environ["SMTP_PASSWORD"]
-
-            cls._load_extras(Config)
-        except KeyError as e:
-            print(f"Missing environment variable: {e}")
-            exit(1)
+        cls._load_extras(Config)
 
         for required_template in cls.REQUIRED_TEMPLATES.values():
             path = os.path.join(root_path, "templates", required_template)
@@ -100,6 +106,123 @@ class Config:
         :return: None
         """
         pass
+
+    @classmethod
+    def environment_variables(cls) -> Dict[str, List[str]]:
+        """
+        Specifies required and optional environment variables
+        :return: The specified environment variables in two lists in
+                 a dictionary, grouped by whether the variables are
+                 required or optional
+        """
+        required = [
+            "FLASK_SECRET",
+            "DB_MODE",
+            "RECAPTCHA_SITE_KEY",
+            "RECAPTCHA_SECRET_KEY",
+            "SMTP_HOST",
+            "SMTP_PORT",
+            "SMTP_ADDRESS",
+            "SMTP_PASSWORD",
+            "DOMAIN_NAME",
+            "HTTP_PORT",
+            "TELEGRAM_API_KEY"
+        ]
+        optional = [
+            "LOGGING_PATH",
+            "DEBUG_LOGGING_PATH",
+            "FLASK_TESTING",
+            "BEHIND_PROXY"
+        ]
+
+        db_mode = os.environ.get("DB_MODE")
+        if db_mode == "sqlite":
+            optional.append("SQLITE_PATH")
+        elif db_mode is not None:
+            db_mode = db_mode.upper()
+            required.append(f"{db_mode}_HOST")
+            required.append(f"{db_mode}_PORT")
+            required.append(f"{db_mode}_USER")
+            required.append(f"{db_mode}_PASSWORD")
+            required.append(f"{db_mode}_DATABASE")
+
+        return {
+            "required": required,
+            "optional": optional
+        }
+
+    @classmethod
+    def ensure_environment_variables_present(cls):
+        """
+        Makes sure that all required environment variables have been set.
+        If this is not the case, the app will exit.
+        :return: None
+        """
+        for env_name in cls.environment_variables()["required"]:
+            if env_name not in os.environ:
+                print(f"Missing environment variable: {env_name}")
+                exit(1)
+
+    @classmethod
+    def dump_env_variables(cls, path: str):
+        """
+        Dumps all environment variables used by this application to a file
+        :param path: The path to the file to which to dump the content
+        :return: None
+        """
+        envs = ""
+        all_env_names = cls.environment_variables()["required"] + \
+            cls.environment_variables()["optional"]
+        for env_name in all_env_names:
+            value = os.environ.get(env_name)
+            if value is not None:
+                envs += f"{env_name}={value}\n"
+
+        with open(path, "w") as f:
+            f.write(envs)
+
+    @classmethod
+    def base_url(cls) -> str:
+        """
+        :return: The base URL of the website
+        """
+        if cls.BEHIND_PROXY:
+            return f"https://{cls.DOMAIN_NAME}"
+        else:
+            return f"http://{cls.DOMAIN_NAME}:{cls.HTTP_PORT}"
+
+    @classmethod
+    def initialize_telegram(cls):
+        """
+        Initializes the telegram bot connection
+        :return: None
+        """
+        Config.TELEGRAM_BOT_CONNECTION = TelegramBotConnection(
+            TelegramBotSettings(Config.TELEGRAM_API_KEY)
+        )
+
+    @classmethod
+    def telegram_bg(cls):
+        """
+        Specifies the background behaviour of the telegram bot
+        By default, the bot listens to /whoami messages
+        and answers with the telegram chat ID
+        :return: None
+        """
+        telegram = cls.TELEGRAM_BOT_CONNECTION
+
+        def handler(_, msg):
+            if msg.is_text():
+                msg: TextMessage = msg
+                print(msg.body)
+
+                if msg.body == "/whoami":
+                    sender = telegram.address
+                    receiver = msg.sender
+                    telegram.send(
+                        TextMessage(sender, receiver, receiver.address))
+
+        telegram.loop(handler)
 
     VERSION: str
     """
@@ -183,6 +306,31 @@ class Config:
     SMTP_PASSWORD: str
     """
     The SMPT Password used for sending emails
+    """
+
+    TELEGRAM_API_KEY: str
+    """
+    API key for a telegram bot
+    """
+
+    TELEGRAM_BOT_CONNECTION: TelegramBotConnection
+    """
+    Telegram bot connection
+    """
+
+    DOMAIN_NAME: str
+    """
+    The name of the domain the website is running on
+    """
+
+    HTTP_PORT: str
+    """
+    The port on which the website is server
+    """
+
+    BEHIND_PROXY: str
+    """
+    Whether or not the site is being served by a reverse proxy like nginx.
     """
 
     MIN_USERNAME_LENGTH: int = 1
