@@ -43,9 +43,6 @@ class Config:
         """
         cls.ensure_environment_variables_present()
 
-        Config.DOMAIN_NAME = os.environ["DOMAIN_NAME"]
-        Config.HTTP_PORT = os.environ["HTTP_PORT"]
-        Config.BEHIND_PROXY = os.environ.get("BEHIND_PROXY") == "1"
         Config.LOGGING_PATH = os.environ.get(
             "LOGGING_PATH",
             os.path.join("/tmp", f"{module_name}.log")
@@ -59,6 +56,7 @@ class Config:
             pkg_resources.get_distribution(module_name).version
         Config.FLASK_SECRET = os.environ["FLASK_SECRET"]
         Config.TESTING = os.environ.get("FLASK_TESTING") == "1"
+        Config.BEHIND_PROXY = os.environ.get("BEHIND_PROXY") == "1"
 
         if Config.TESTING:
             Config.DB_MODE = "sqlite"
