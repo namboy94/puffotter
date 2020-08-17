@@ -144,6 +144,13 @@ class Config:
             required.append(f"{db_mode}_PASSWORD")
             required.append(f"{db_mode}_DATABASE")
 
+            if db_mode == "POSTGRESQL":
+                required += [
+                    "POSTGRES_USER",
+                    "POSTGRES_PASSWORD",
+                    "POSTGRES_DB"
+                ]
+
         return {
             "required": required,
             "optional": optional
