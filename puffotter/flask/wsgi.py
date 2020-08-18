@@ -19,6 +19,7 @@ LICENSE"""
 
 import time
 import sentry_sdk
+import traceback
 from threading import Thread
 from typing import Callable, Tuple, Dict, Type
 from cheroot.wsgi import Server, PathInfoDispatcher
@@ -47,7 +48,8 @@ def __start_background_tasks(
                         _function()
                 except Exception as error:
                     app.logger.error(f"Encountered exception in "
-                                     f"background task {_name}: {error}")
+                                     f"background task {_name}: {error}\n"
+                                     f"{traceback.format_exc()}")
                     sentry_sdk.capture_exception(error)
                 time.sleep(_delay)
         return Thread(target=run_task)

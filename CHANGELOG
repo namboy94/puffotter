@@ -1,3 +1,5 @@
+V 0.11.0:
+  - Log traceback in errors in flask framework
 V 0.10.2:
   - Added more postgres variables to required variables for better backups
 V 0.10.1:

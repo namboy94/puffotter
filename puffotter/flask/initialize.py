@@ -21,6 +21,7 @@ import base64
 import binascii
 import logging
 import sentry_sdk
+import traceback
 from sentry_sdk.integrations.flask import FlaskIntegration
 from typing import List, Optional, Type, Callable, Tuple
 from flask import redirect, url_for, flash, render_template
@@ -170,7 +171,8 @@ def __init_app(
         else:
             error = HTTPException(config.STRINGS["500_message"])
             error.code = 500
-            app.logger.error("Caught exception: {}".format(e))
+            app.logger.error("Caught exception: {}\n"
+                             .format(e, traceback.format_exc()))
             sentry_sdk.capture_exception(e)
         return render_template(
             config.REQUIRED_TEMPLATES["error_page"],
