@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
+import sys
 import base64
 import binascii
 import logging
@@ -171,14 +172,9 @@ def __init_app(
         else:
             error = HTTPException(config.STRINGS["500_message"])
             error.code = 500
-
-            try:
-                raise e
-            except Exception as e:
-                trace = traceback.format_exc()
-                app.logger.error("Caught exception: {}\n".format(e, trace))
-                sentry_sdk.capture_exception(e)
-
+            trace = "".join(traceback.format_exception(*sys.exc_info()))
+            app.logger.error("Caught exception: {}\n".format(e, trace))
+            sentry_sdk.capture_exception(e)
         return render_template(
             config.REQUIRED_TEMPLATES["error_page"],
             error=error
