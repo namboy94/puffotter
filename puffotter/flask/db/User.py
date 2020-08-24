@@ -89,7 +89,7 @@ class User(ModelMixin, db.Model):
     Telegram chat ID for the user if set up
     """
 
-    api_keys: List[ApiKey] = db.relationship(
+    api_keys: List["ApiKey"] = db.relationship(
         "ApiKey", back_populates="user", cascade="all, delete"
     )
     """
