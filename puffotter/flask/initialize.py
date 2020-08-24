@@ -129,6 +129,7 @@ def __init_app(
     """
     app.testing = config.TESTING
     app.config["TRAP_HTTP_EXCEPTIONS"] = True
+    app.config["SERVER_NAME"] = Config.base_url().split("://", 1)[1]
     app.secret_key = config.FLASK_SECRET
     for blueprint_generator, blueprint_name in blueprint_generators:
         if blueprint_name in CREATED_BLUEPRINTS:
@@ -173,7 +174,7 @@ def __init_app(
             error = HTTPException(config.STRINGS["500_message"])
             error.code = 500
             trace = "".join(traceback.format_exception(*sys.exc_info()))
-            app.logger.error("Caught exception: {}\n".format(e, trace))
+            app.logger.error("Caught exception: {}\n{}".format(e, trace))
             sentry_sdk.capture_exception(e)
         return render_template(
             config.REQUIRED_TEMPLATES["error_page"],
