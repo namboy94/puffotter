@@ -112,8 +112,9 @@ def define_blueprint(blueprint_name: str) -> Blueprint:
                 db.session.commit()
                 email_msg = render_template(
                     "email/registration.html",
-                    host=request.host,
-                    target=os.path.join(request.host, "confirm"),
+                    domain_name=Config.DOMAIN_NAME,
+                    host_url=Config.base_url(),
+                    target_url=os.path.join(Config.base_url(), "confirm"),
                     username=username,
                     user_id=user.id,
                     confirm_key=confirmation_key,
@@ -191,8 +192,9 @@ def define_blueprint(blueprint_name: str) -> Blueprint:
 
                     email_msg = render_template(
                         "email/forgot_password.html",
-                        host=request.host,
-                        target=os.path.join(request.host, "login"),
+                        domain_name=Config.DOMAIN_NAME,
+                        host_url=Config.base_url(),
+                        target_url=os.path.join(Config.base_url(), "login"),
                         password=new_pass,
                         username=user.username,
                         **Config.TEMPLATE_EXTRAS["forgot_email"]()
