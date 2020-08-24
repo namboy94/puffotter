@@ -23,6 +23,7 @@ import binascii
 import logging
 import sentry_sdk
 import traceback
+from sqlalchemy.exc import OperationalError
 from sentry_sdk.integrations.logging import LoggingIntegration
 from sentry_sdk.integrations.flask import FlaskIntegration
 from typing import List, Optional, Type, Callable, Tuple
@@ -215,7 +216,11 @@ def __init_db(config: Type[Config], models: List[db.Model]):
         app.logger.debug(f"Loading model {model.__name__}")
 
     with app.app_context():
-        db.create_all()
+        try:
+            db.create_all()
+        except OperationalError:
+            print("Failed to connect to the database")
+            sys.exit(1)
 
 
 def __init_login_manager():
