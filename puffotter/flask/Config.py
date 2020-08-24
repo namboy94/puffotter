@@ -20,7 +20,6 @@ LICENSE"""
 import os
 import pkg_resources
 from typing import Type, Dict, Any, Callable, List, Optional
-from bokkichat.entities.message.TextMessage import TextMessage
 from bokkichat.settings.impl.TelegramBotSettings import TelegramBotSettings
 from bokkichat.connection.impl.TelegramBotConnection import \
     TelegramBotConnection
@@ -57,6 +56,8 @@ class Config:
         Config.FLASK_SECRET = os.environ["FLASK_SECRET"]
         Config.TESTING = os.environ.get("FLASK_TESTING") == "1"
         Config.BEHIND_PROXY = os.environ.get("BEHIND_PROXY") == "1"
+        Config.HTTP_PORT = int(os.environ.get("HTTP_PORT", "80"))
+        Config.DOMAIN_NAME = os.environ.get("DOMAIN_NAME", "localhost")
 
         if Config.TESTING:
             Config.DB_MODE = "sqlite"
@@ -86,6 +87,7 @@ class Config:
         Config.SMTP_ADDRESS = os.environ["SMTP_ADDRESS"]
         Config.SMTP_PASSWORD = os.environ["SMTP_PASSWORD"]
         Config.TELEGRAM_API_KEY = os.environ["TELEGRAM_API_KEY"]
+        Config.TELEGRAM_WHOAMI = os.environ.get("TELEGRAM_WHOAMI", "1") == "1"
 
         cls._load_extras(Config)
 
@@ -130,7 +132,8 @@ class Config:
             "FLASK_TESTING",
             "DOMAIN_NAME",
             "HTTP_PORT",
-            "BEHIND_PROXY"
+            "BEHIND_PROXY",
+            "TELEGRAM_WHOAMI"
         ]
 
         db_mode = os.environ.get("DB_MODE")
@@ -210,29 +213,6 @@ class Config:
             TelegramBotSettings(Config.TELEGRAM_API_KEY)
         )
 
-    @classmethod
-    def telegram_bg(cls):
-        """
-        Specifies the background behaviour of the telegram bot
-        By default, the bot listens to /whoami messages
-        and answers with the telegram chat ID
-        :return: None
-        """
-        telegram = cls.TELEGRAM_BOT_CONNECTION
-
-        def handler(_, msg):
-            if msg.is_text():
-                msg: TextMessage = msg
-                print(msg.body)
-
-                if msg.body == "/whoami":
-                    sender = telegram.address
-                    receiver = msg.sender
-                    telegram.send(
-                        TextMessage(sender, receiver, receiver.address))
-
-        telegram.loop(handler)
-
     VERSION: str
     """
     The current version of the application
@@ -268,12 +248,12 @@ class Config:
     The path to the logging path for WARNING messages
     """
 
-    HTTP_PORT: int = int(os.environ.get("HTTP_PORT", "80"))
+    HTTP_PORT: int
     """
     The port to use when serving the flask application
     """
 
-    DOMAIN_NAME: str = os.environ.get("DOMAIN_NAME", "localhost")
+    DOMAIN_NAME: str
     """
     The domain name of the website
     """
@@ -325,6 +305,11 @@ class Config:
     TELEGRAM_BOT_CONNECTION: TelegramBotConnection
     """
     Telegram bot connection
+    """
+
+    TELEGRAM_WHOAMI: bool
+    """
+    Whether or not the telegram WHOAMI background thread will be started
     """
 
     BEHIND_PROXY: bool

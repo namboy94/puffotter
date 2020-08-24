@@ -49,7 +49,8 @@ if __name__ == "__main__":
                 "werkzeug",
                 "sentry-sdk[flask]",
                 "blinker",
-                "bokkichat"
+                "bokkichat",
+                "python-telegram-bot"
             ],
             "crypto": [
                 "bcrypt"
