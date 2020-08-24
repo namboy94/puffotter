@@ -23,6 +23,7 @@ import binascii
 import logging
 import sentry_sdk
 import traceback
+from sentry_sdk.integrations.logging import LoggingIntegration
 from sentry_sdk.integrations.flask import FlaskIntegration
 from typing import List, Optional, Type, Callable, Tuple
 from flask import redirect, url_for, flash, render_template
@@ -87,9 +88,13 @@ def __init_logging(config: Type[Config]):
     :param config: The configuration to use
     :return: None
     """
+    sentry_logging = LoggingIntegration(
+        level=logging.INFO,
+        event_level=None
+    )
     sentry_sdk.init(
         dsn=config.SENTRY_DSN,
-        integrations=[FlaskIntegration()]
+        integrations=[FlaskIntegration(), sentry_logging]
     )
 
     app.logger.removeHandler(default_handler)
@@ -113,7 +118,6 @@ def __init_logging(config: Type[Config]):
         level=logging.DEBUG,
         format=log_format
     )
-    app.logger.info("STARTING FLASK")
 
 
 def __init_app(
