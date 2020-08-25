@@ -18,6 +18,7 @@ along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 import os
+import logging
 import pkg_resources
 from typing import Type, Dict, Any, Callable, List, Optional
 from bokkichat.settings.impl.TelegramBotSettings import TelegramBotSettings
@@ -50,6 +51,14 @@ class Config:
             "DEBUG_LOGGING_PATH",
             os.path.join("/tmp", f"{module_name}-debug.log")
         )
+        verbosity_name = os.environ.get("VERBOSITY", "debug").lower()
+        Config.VERBOSITY = {
+            "error": logging.ERROR,
+            "warning": logging.WARNING,
+            "info": logging.INFO,
+            "debug": logging.DEBUG
+        }.get(verbosity_name, logging.DEBUG)
+
         Config.SENTRY_DSN = sentry_dsn
         Config.VERSION = \
             pkg_resources.get_distribution(module_name).version
@@ -221,6 +230,11 @@ class Config:
     SENTRY_DSN: str
     """
     The sentry DSN used for error logging
+    """
+
+    VERBOSITY: int
+    """
+    The verbosity level of the logging when printing to the console
     """
 
     FLASK_SECRET: str

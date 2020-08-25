@@ -19,6 +19,7 @@ LICENSE"""
 
 import sys
 import time
+import logging
 import sentry_sdk
 import traceback
 from threading import Thread
@@ -86,6 +87,7 @@ def start_server(
             and config.TELEGRAM_WHOAMI:
         try:
             config.initialize_telegram()
+            Config.TELEGRAM_BOT_CONNECTION.bot.logger.setLevel(logging.WARNING)
         except TimedOut:
             print("Could not initialize telegram")
             sys.exit(1)

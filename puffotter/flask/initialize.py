@@ -112,13 +112,19 @@ def __init_logging(config: Type[Config]):
     debug_handler.setLevel(logging.DEBUG)
     debug_handler.setFormatter(formatter)
 
+    stream_handler = logging.StreamHandler(stream=sys.stdout)
+    stream_handler.setLevel(config.VERBOSITY)
+    stream_handler.setFormatter(formatter)
+
     app.logger.addHandler(info_handler)
     app.logger.addHandler(debug_handler)
+    app.logger.addHandler(stream_handler)
 
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format=log_format
-    )
+    app.logger.setLevel(logging.DEBUG)
+
+    app.logger.warning("Test")
+    app.logger.info("Test2")
+    app.logger.debug("Tets")
 
 
 def __init_app(
