@@ -1,3 +1,5 @@
+V 0.12.1:
+  - Changed file loggers to time-based rollover loggers
 V 0.12.0:
   - Added type annotations to db model attributes
   - Made db model relations bi-directional

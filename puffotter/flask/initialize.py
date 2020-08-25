@@ -23,6 +23,7 @@ import binascii
 import logging
 import sentry_sdk
 import traceback
+from logging.handlers import TimedRotatingFileHandler
 from sqlalchemy.exc import OperationalError
 from sentry_sdk.integrations.logging import LoggingIntegration
 from sentry_sdk.integrations.flask import FlaskIntegration
@@ -104,11 +105,21 @@ def __init_logging(config: Type[Config]):
         "[%(asctime)s, %(levelname)s] %(module)s[%(lineno)d]: %(message)s"
     formatter = logging.Formatter(log_format)
 
-    info_handler = logging.FileHandler(config.LOGGING_PATH)
+    info_handler = TimedRotatingFileHandler(
+        config.LOGGING_PATH,
+        when="midnight",
+        interval=1,
+        backupCount=7
+    )
     info_handler.setLevel(logging.INFO)
     info_handler.setFormatter(formatter)
 
-    debug_handler = logging.FileHandler(config.DEBUG_LOGGING_PATH)
+    debug_handler = TimedRotatingFileHandler(
+        config.DEBUG_LOGGING_PATH,
+        when="midnight",
+        interval=1,
+        backupCount=7
+    )
     debug_handler.setLevel(logging.DEBUG)
     debug_handler.setFormatter(formatter)
 
