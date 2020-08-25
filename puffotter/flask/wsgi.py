@@ -17,11 +17,17 @@ You should have received a copy of the GNU General Public License
 along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
+import sys
 import time
+import logging
 import sentry_sdk
+import traceback
 from threading import Thread
+# noinspection PyPackageRequirements
+from telegram.error import TimedOut
 from typing import Callable, Tuple, Dict, Type
 from cheroot.wsgi import Server, PathInfoDispatcher
+from puffotter.flask.background.telegram import telegram_whoami
 from puffotter.flask.base import app
 from puffotter.flask.Config import Config
 
@@ -47,7 +53,8 @@ def __start_background_tasks(
                         _function()
                 except Exception as error:
                     app.logger.error(f"Encountered exception in "
-                                     f"background task {_name}: {error}")
+                                     f"background task {_name}: {error}\n"
+                                     f"{traceback.format_exc()}")
                     sentry_sdk.capture_exception(error)
                 time.sleep(_delay)
         return Thread(target=run_task)
@@ -75,13 +82,21 @@ def start_server(
                                   executes the task
     :return: None
     """
-    if not config.TELEGRAM_API_KEY == "" and not config.TESTING:
-        config.initialize_telegram()
+    if not config.TELEGRAM_API_KEY == "" \
+            and not config.TESTING \
+            and config.TELEGRAM_WHOAMI:
+        try:
+            config.initialize_telegram()
+            Config.TELEGRAM_BOT_CONNECTION.bot.logger.setLevel(logging.WARNING)
+        except TimedOut:
+            print("Could not initialize telegram")
+            sys.exit(1)
         task_definitions.update({
-            "telegram_bg": (1, config.telegram_bg)
+            "telegram_bg": (30, telegram_whoami)
         })
     __start_background_tasks(task_definitions)
 
+    app.logger.info("STARTING FLASK")
     server = Server(
         ("0.0.0.0", config.HTTP_PORT),
         PathInfoDispatcher({"/": app})

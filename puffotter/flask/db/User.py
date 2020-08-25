@@ -17,10 +17,14 @@ You should have received a copy of the GNU General Public License
 along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-from typing import Dict, Any
+from typing import Dict, Any, Optional, TYPE_CHECKING, List
+from puffotter.flask.Config import Config
 from puffotter.flask.base import db
 from puffotter.flask.db.ModelMixin import ModelMixin
 from puffotter.crypto import verify_password
+if TYPE_CHECKING:
+    from puffotter.flask.db.ApiKey import ApiKey
+    from puffotter.flask.db.TelegramChatId import TelegramChatId
 
 
 class User(ModelMixin, db.Model):
@@ -43,32 +47,53 @@ class User(ModelMixin, db.Model):
     The name of the table
     """
 
-    username = db.Column(db.String(12), nullable=False, unique=True)
+    username: str = db.Column(
+        db.String(Config.MAX_USERNAME_LENGTH),
+        nullable=False,
+        unique=True
+    )
     """
     The user's username
     """
 
-    email = db.Column(db.String(150), nullable=False, unique=True)
+    email: str = db.Column(db.String(150), nullable=False, unique=True)
     """
     The user's email address
     """
 
-    password_hash = db.Column(db.String(255), nullable=False)
+    password_hash: str = db.Column(db.String(255), nullable=False)
     """
     The user's hashed password, salted and hashed.
     """
 
-    confirmed = db.Column(db.Boolean, nullable=False, default=False)
+    confirmed: bool = db.Column(db.Boolean, nullable=False, default=False)
     """
     The account's confirmation status. Logins should be impossible as long as
     this value is False.
     """
 
-    confirmation_hash = db.Column(db.String(255), nullable=False)
+    confirmation_hash: str = db.Column(db.String(255), nullable=False)
     """
     The account's confirmation hash. This is the hash of a key emailed to
     the user. Only once the user follows the link in the email containing the
     key will their account be activated
+    """
+
+    telegram_chat_id: Optional["TelegramChatId"] = db.relationship(
+        "TelegramChatId",
+        uselist=False,
+        back_populates="user",
+        cascade="all, delete"
+    )
+    """
+    Telegram chat ID for the user if set up
+    """
+
+    api_keys: List["ApiKey"] = db.relationship(
+        "ApiKey", back_populates="user", cascade="all, delete"
+    )
+    """
+    API keys for this user
     """
 
     @property

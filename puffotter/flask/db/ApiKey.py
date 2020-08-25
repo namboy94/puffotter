@@ -19,6 +19,7 @@ LICENSE"""
 
 import time
 from typing import Dict, Any
+from puffotter.flask.db.User import User
 from puffotter.flask.base import db
 from puffotter.flask.Config import Config
 from puffotter.flask.db.ModelMixin import ModelMixin
@@ -44,29 +45,27 @@ class ApiKey(ModelMixin, db.Model):
     The name of the table
     """
 
-    user_id = db.Column(
-        db.Integer, db.ForeignKey(
-            "users.id", onupdate="CASCADE", ondelete="CASCADE"
-        ),
+    user_id: int = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id"),
         nullable=False
     )
     """
     The ID of the user associated with this API key
     """
 
-    user = db.relationship(
-        "User", backref=db.backref("api_keys", lazy=True, cascade="all,delete")
-    )
+    user: User = db.relationship("User", back_populates="api_keys")
     """
     The user associated with this API key
     """
 
-    key_hash = db.Column(db.String(255), nullable=False)
+    key_hash: str = db.Column(db.String(255), nullable=False)
     """
     The hash of the API key
     """
 
-    creation_time = db.Column(db.Integer, nullable=False, default=time.time)
+    creation_time: int = \
+        db.Column(db.Integer, nullable=False, default=time.time)
     """
     The time at which this API key was created as a UNIX timestamp
     """

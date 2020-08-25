@@ -17,10 +17,14 @@ You should have received a copy of the GNU General Public License
 along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
+import sys
 import base64
 import binascii
 import logging
 import sentry_sdk
+import traceback
+from sqlalchemy.exc import OperationalError
+from sentry_sdk.integrations.logging import LoggingIntegration
 from sentry_sdk.integrations.flask import FlaskIntegration
 from typing import List, Optional, Type, Callable, Tuple
 from flask import redirect, url_for, flash, render_template
@@ -85,9 +89,13 @@ def __init_logging(config: Type[Config]):
     :param config: The configuration to use
     :return: None
     """
+    sentry_logging = LoggingIntegration(
+        level=logging.INFO,
+        event_level=None
+    )
     sentry_sdk.init(
         dsn=config.SENTRY_DSN,
-        integrations=[FlaskIntegration()]
+        integrations=[FlaskIntegration(), sentry_logging]
     )
 
     app.logger.removeHandler(default_handler)
@@ -104,14 +112,19 @@ def __init_logging(config: Type[Config]):
     debug_handler.setLevel(logging.DEBUG)
     debug_handler.setFormatter(formatter)
 
+    stream_handler = logging.StreamHandler(stream=sys.stdout)
+    stream_handler.setLevel(config.VERBOSITY)
+    stream_handler.setFormatter(formatter)
+
     app.logger.addHandler(info_handler)
     app.logger.addHandler(debug_handler)
+    app.logger.addHandler(stream_handler)
 
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format=log_format
-    )
-    app.logger.info("STARTING FLASK")
+    app.logger.setLevel(logging.DEBUG)
+
+    app.logger.warning("Test")
+    app.logger.info("Test2")
+    app.logger.debug("Tets")
 
 
 def __init_app(
@@ -127,6 +140,7 @@ def __init_app(
     """
     app.testing = config.TESTING
     app.config["TRAP_HTTP_EXCEPTIONS"] = True
+    app.config["SERVER_NAME"] = Config.base_url().split("://", 1)[1]
     app.secret_key = config.FLASK_SECRET
     for blueprint_generator, blueprint_name in blueprint_generators:
         if blueprint_name in CREATED_BLUEPRINTS:
@@ -170,7 +184,8 @@ def __init_app(
         else:
             error = HTTPException(config.STRINGS["500_message"])
             error.code = 500
-            app.logger.error("Caught exception: {}".format(e))
+            trace = "".join(traceback.format_exception(*sys.exc_info()))
+            app.logger.error("Caught exception: {}\n{}".format(e, trace))
             sentry_sdk.capture_exception(e)
         return render_template(
             config.REQUIRED_TEMPLATES["error_page"],
@@ -207,7 +222,11 @@ def __init_db(config: Type[Config], models: List[db.Model]):
         app.logger.debug(f"Loading model {model.__name__}")
 
     with app.app_context():
-        db.create_all()
+        try:
+            db.create_all()
+        except OperationalError:
+            print("Failed to connect to the database")
+            sys.exit(1)
 
 
 def __init_login_manager():

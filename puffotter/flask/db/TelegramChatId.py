@@ -17,13 +17,13 @@ You should have received a copy of the GNU General Public License
 along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-import time
 from typing import Dict, Any
 from bokkichat.entities.Address import Address
 from bokkichat.entities.message.TextMessage import TextMessage
 from puffotter.flask.base import db
 from puffotter.flask.Config import Config
 from puffotter.flask.db.ModelMixin import ModelMixin
+from puffotter.flask.db.User import User
 
 
 class TelegramChatId(ModelMixin, db.Model):
@@ -45,31 +45,22 @@ class TelegramChatId(ModelMixin, db.Model):
     The name of the table
     """
 
-    user_id = db.Column(
-        db.Integer, db.ForeignKey(
-            "users.id", onupdate="CASCADE", ondelete="CASCADE"
-        ),
+    user_id: int = db.Column(
+        db.Integer, db.ForeignKey("users.id"),
         nullable=False
     )
     """
     The ID of the user associated with this telegram chat ID
     """
 
-    user = db.relationship("User", backref=db.backref(
-        "telegram_chat_ids", lazy=True, cascade="all,delete"
-    ))
+    user: User = db.relationship("User", back_populates="telegram_chat_id")
     """
     The user associated with this telegram chat ID
     """
 
-    chat_id = db.Column(db.String(255), nullable=False)
+    chat_id: str = db.Column(db.String(255), nullable=False)
     """
     The telegram chat ID
-    """
-
-    creation_time = db.Column(db.Integer, nullable=False, default=time.time)
-    """
-    The time at which this API key was created as a UNIX timestamp
     """
 
     def send_message(self, message_text: str):

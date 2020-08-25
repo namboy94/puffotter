@@ -45,11 +45,13 @@ if __name__ == "__main__":
                 "flask",
                 "flask-sqlalchemy",
                 "flask-login",
+                "sqlalchemy",
                 "cheroot",
                 "werkzeug",
                 "sentry-sdk[flask]",
                 "blinker",
-                "bokkichat"
+                "bokkichat",
+                "python-telegram-bot"
             ],
             "crypto": [
                 "bcrypt"
