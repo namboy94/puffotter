@@ -79,12 +79,17 @@ class Config:
             )
             Config.DB_URI = "sqlite:///" + sqlite_path
         else:
-            base = Config.DB_MODE.upper() + "_"
+            base = Config.DB_MODE.upper()
+            db_keyword = "DATABASE"
+            if base == "POSTGRESQL":
+                base = "POSTGRES"
+                db_keyword = "DB"
+            base += "_"
             db_host = os.environ[base + "HOST"]
             db_port = os.environ[base + "PORT"]
             db_user = os.environ[base + "USER"]
             db_password = os.environ[base + "PASSWORD"]
-            db_database = os.environ[base + "DATABASE"]
+            db_database = os.environ[base + db_keyword]
             Config.DB_URI = f"{Config.DB_MODE}://{db_user}:{db_password}@"\
                             f"{db_host}:{db_port}/{db_database}"
 
