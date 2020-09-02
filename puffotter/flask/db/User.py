@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-from typing import Dict, Any, Optional, TYPE_CHECKING, List
+from typing import Optional, TYPE_CHECKING, List
 from puffotter.flask.Config import Config
 from puffotter.flask.base import db
 from puffotter.flask.db.ModelMixin import ModelMixin
@@ -142,20 +142,3 @@ class User(ModelMixin, db.Model):
         :return: True if the key matches, False otherwise
         """
         return verify_password(confirmation_key, self.confirmation_hash)
-
-    def __json__(self, include_children: bool = False) -> Dict[str, Any]:
-        """
-        Generates a dictionary containing the information of this model
-        :param include_children: Specifies if children data models will be
-                                 included or if they're limited to IDs
-        :return: A dictionary representing the model's values
-        """
-        data = {
-            "id": self.id,
-            "username": self.username,
-            "email": self.email,
-            "confirmed": self.confirmed
-        }
-        if include_children:
-            pass
-        return data

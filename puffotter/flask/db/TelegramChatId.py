@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-from typing import Dict, Any
 from bokkichat.entities.Address import Address
 from bokkichat.entities.message.TextMessage import TextMessage
 from puffotter.flask.base import db
@@ -76,19 +75,3 @@ class TelegramChatId(ModelMixin, db.Model):
             message_text
         )
         Config.TELEGRAM_BOT_CONNECTION.send(message)
-
-    def __json__(self, include_children: bool = False) -> Dict[str, Any]:
-        """
-        Generates a dictionary containing the information of this model
-        :param include_children: Specifies if children data models will be
-                                 included or if they're limited to IDs
-        :return: A dictionary representing the model's values
-        """
-        data = {
-            "id": self.id,
-            "user_id": self.user_id,
-            "chat_id": self.chat_id
-        }
-        if include_children:
-            data["user"] = self.user.__json__(include_children)
-        return data
