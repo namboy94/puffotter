@@ -18,8 +18,9 @@ along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 from enum import Enum
-from typing import Dict, Any
+from typing import Dict, Any, Type
 from puffotter.flask.base import db
+from sqlalchemy.inspection import inspect
 
 
 class ModelMixin:
@@ -42,9 +43,34 @@ class ModelMixin:
                                  included or if they're limited to IDs
         :return: A dictionary representing the model's values
         """
-        # TODO Make this automated.
-        # repr and str both depend on this being implemented correctly.
-        raise NotImplementedError()  # pragma: no cover
+        json_dict = {}
+
+        relations: Dict[str, Type] = {
+            key: value.mapper.class_
+            for key, value in inspect(self.__class__).relationships.items()
+        }
+
+        for attribute in inspect(self).attrs:
+            key = attribute.key
+            value = attribute.value
+            relation_cls = relations.get(key)
+
+            if isinstance(value, list):  # Skip one-to-many relations
+                continue
+            elif key.endswith("_hash"):
+                continue
+            elif relation_cls is not None and \
+                    issubclass(relation_cls, ModelMixin):
+                if include_children and value is not None:
+                    value = value.__json__(include_children)
+                elif include_children and value is None:
+                    value = None
+                else:
+                    continue
+
+            json_dict[attribute.key] = value
+
+        return json_dict
 
     def __str__(self) -> str:
         """

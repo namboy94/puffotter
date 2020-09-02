@@ -31,16 +31,15 @@ class TestUser(_TestFramework):
         :return: None
         """
         user = self.generate_sample_user()[0]
-        self.assertEqual(
-            user.__json__(False),
-            {
-                "id": user.id,
-                "email": user.email,
-                "confirmed": True,
-                "username": user.username
-            }
-        )
-        self.assertEqual(user.__json__(True), user.__json__(False))
+        should = {
+            "id": user.id,
+            "email": user.email,
+            "confirmed": True,
+            "username": user.username
+        }
+        self.assertEqual(user.__json__(False), should)
+        should.update({"telegram_chat_id": None})
+        self.assertEqual(user.__json__(True), should)
 
     def test_string_representation(self):
         """

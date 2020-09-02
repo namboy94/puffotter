@@ -18,7 +18,6 @@ along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 import time
-from typing import Dict, Any
 from puffotter.flask.db.User import User
 from puffotter.flask.base import db
 from puffotter.flask.Config import Config
@@ -92,19 +91,3 @@ class ApiKey(ModelMixin, db.Model):
                 return verify_password(api_key, self.key_hash)
         except ValueError:
             return False
-
-    def __json__(self, include_children: bool = False) -> Dict[str, Any]:
-        """
-        Generates a dictionary containing the information of this model
-        :param include_children: Specifies if children data models will be
-                                 included or if they're limited to IDs
-        :return: A dictionary representing the model's values
-        """
-        data = {
-            "id": self.id,
-            "user_id": self.user_id,
-            "creation_time": self.creation_time
-        }
-        if include_children:
-            data["user"] = self.user.__json__(include_children)
-        return data

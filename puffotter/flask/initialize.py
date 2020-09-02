@@ -133,10 +133,6 @@ def __init_logging(config: Type[Config]):
 
     app.logger.setLevel(logging.DEBUG)
 
-    app.logger.warning("Test")
-    app.logger.info("Test2")
-    app.logger.debug("Tets")
-
 
 def __init_app(
         config: Type[Config],
