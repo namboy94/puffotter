@@ -1,3 +1,5 @@
+V 0.14.1:
+  - Fixed issue with postgres variables
 V 0.14.0:
   - Made __json__ method for ModelMixins automated
 V 0.13.0:

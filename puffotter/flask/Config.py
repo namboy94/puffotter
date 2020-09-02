@@ -155,18 +155,16 @@ class Config:
             optional.append("SQLITE_PATH")
         elif db_mode is not None:
             db_mode = db_mode.upper()
+            db_keyword = "DATABASE"
+            if db_mode == "POSTGRESQL":
+                db_mode = "POSTGRES"
+                db_keyword = "DB"
+
             required.append(f"{db_mode}_HOST")
             required.append(f"{db_mode}_PORT")
             required.append(f"{db_mode}_USER")
             required.append(f"{db_mode}_PASSWORD")
-            required.append(f"{db_mode}_DATABASE")
-
-            if db_mode == "POSTGRESQL":
-                required += [
-                    "POSTGRES_USER",
-                    "POSTGRES_PASSWORD",
-                    "POSTGRES_DB"
-                ]
+            required.append(f"{db_mode}_{db_keyword}")
 
         return {
             "required": required,
