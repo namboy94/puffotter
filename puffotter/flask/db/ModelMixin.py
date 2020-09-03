@@ -61,8 +61,19 @@ class ModelMixin:
                 continue
             elif relation_cls is not None and \
                     issubclass(relation_cls, ModelMixin):
+
+                recursion_detected = False
+                other_relations = \
+                    list(inspect(relation_cls).relationships.values())
+                for other_relation in other_relations:
+                    other_relation_cls = other_relation.mapper.class_
+                    if other_relation_cls == self.__class__:
+                        recursion_detected = True
+
                 if include_children and value is not None:
-                    value = value.__json__(include_children)
+                    value = value.__json__(
+                        include_children and not recursion_detected
+                    )
                 elif include_children and value is None:
                     value = None
                 else:

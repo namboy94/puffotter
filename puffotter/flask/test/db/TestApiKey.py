@@ -48,7 +48,7 @@ class TestApiKey(_TestFramework):
             {
                 "id": api_key.id,
                 "user_id": user.id,
-                "user": user.__json__(True),
+                "user": user.__json__(False),
                 "creation_time": api_key.creation_time
             }
         )
