@@ -17,11 +17,13 @@ You should have received a copy of the GNU General Public License
 along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
+import sentry_sdk
 from functools import wraps
 from typing import Callable
 from flask import jsonify, make_response, request
 from werkzeug.exceptions import Unauthorized
 from puffotter.flask.exceptions import ApiException
+from puffotter.flask.base import app
 
 
 def api(func: Callable) -> Callable:
@@ -57,6 +59,8 @@ def api(func: Callable) -> Callable:
                 for error_type in [
                     KeyError, TypeError, ValueError, ApiException
                 ]:
+                    app.logger.error("Caught exception in API: {}".format(e))
+                    sentry_sdk.capture_exception(e)
                     if isinstance(e, error_type):
                         raise e
                 raise ApiException("server error", 500)
