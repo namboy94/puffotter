@@ -1,3 +1,6 @@
+V 0.14.2:
+  - Fixed endless recursion issues in json representation
+  - Fixed missing error logging in API
 V 0.14.1:
   - Fixed issue with postgres variables
 V 0.14.0:

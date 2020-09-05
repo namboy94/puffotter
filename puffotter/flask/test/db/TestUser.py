@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
+from puffotter.flask.db.TelegramChatId import TelegramChatId
 from puffotter.flask.test.TestFramework import _TestFramework
 
 
@@ -116,3 +117,16 @@ class TestUser(_TestFramework):
         self.assertFalse(user.verify_password("AAAAAA"))
         self.assertTrue(user.verify_confirmation(confirm_key))
         self.assertFalse(user.verify_confirmation("AAAAAA"))
+
+    def test_json_with_telegram_chat_id(self):
+        """
+        Tests whether or not including children can cause recursion errors
+        :return: None
+        """
+        user, _, _ = self.generate_sample_user(True)
+        chat_id = TelegramChatId(user=user, chat_id="AAA")
+        self.db.session.add(chat_id)
+        self.db.session.commit()
+        should = user.__json__(False)
+        should.update({"telegram_chat_id": chat_id.__json__(False)})
+        self.assertEqual(user.__json__(True), should)
