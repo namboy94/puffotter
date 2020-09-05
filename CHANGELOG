@@ -1,3 +1,5 @@
+V 0.14.3:
+  - Fixed flask model JSON behaviour when dealing with lists
 V 0.14.2:
   - Fixed endless recursion issues in json representation
   - Fixed missing error logging in API

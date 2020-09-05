@@ -18,7 +18,7 @@ along with puffotter.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 from enum import Enum
-from typing import Dict, Any, Type
+from typing import Dict, Any, Type, Optional, List
 from puffotter.flask.base import db
 from sqlalchemy.inspection import inspect
 
@@ -36,13 +36,21 @@ class ModelMixin:
     The ID is the primary key of the table and increments automatically
     """
 
-    def __json__(self, include_children: bool = False) -> Dict[str, Any]:
+    def __json__(
+            self,
+            include_children: bool = False,
+            ignore_keys: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
         """
         Generates a dictionary containing the information of this model
         :param include_children: Specifies if children data models will be
                                  included or if they're limited to IDs
+        :param ignore_keys: If provided, will not include any of these keys
         :return: A dictionary representing the model's values
         """
+        if ignore_keys is None:
+            ignore_keys = []
+
         json_dict = {}
 
         relations: Dict[str, Type] = {
@@ -55,25 +63,34 @@ class ModelMixin:
             value = attribute.value
             relation_cls = relations.get(key)
 
-            if isinstance(value, list):  # Skip one-to-many relations
+            if key in ignore_keys:
                 continue
-            elif key.endswith("_hash"):
+            elif key.endswith("_hash"):  # Skip password hashes etc
                 continue
+            elif isinstance(value, Enum):
+                value = value.name
             elif relation_cls is not None and \
                     issubclass(relation_cls, ModelMixin):
 
-                recursion_detected = False
+                recursion_keys = []
                 other_relations = \
                     list(inspect(relation_cls).relationships.values())
                 for other_relation in other_relations:
                     other_relation_cls = other_relation.mapper.class_
                     if other_relation_cls == self.__class__:
-                        recursion_detected = True
+                        recursion_keys.append(other_relation.key)
+                recursion_keys += ignore_keys
 
                 if include_children and value is not None:
-                    value = value.__json__(
-                        include_children and not recursion_detected
-                    )
+                    if isinstance(value, list):
+                        value = [
+                            x.__json__(include_children, recursion_keys)
+                            for x in value
+                        ]
+                    else:
+                        value = value.__json__(
+                            include_children, recursion_keys
+                        )
                 elif include_children and value is None:
                     value = None
                 else:

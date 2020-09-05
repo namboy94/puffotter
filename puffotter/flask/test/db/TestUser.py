@@ -39,7 +39,10 @@ class TestUser(_TestFramework):
             "username": user.username
         }
         self.assertEqual(user.__json__(False), should)
-        should.update({"telegram_chat_id": None})
+        should.update({
+            "telegram_chat_id": None,
+            "api_keys": []
+        })
         self.assertEqual(user.__json__(True), should)
 
     def test_string_representation(self):
@@ -125,8 +128,15 @@ class TestUser(_TestFramework):
         """
         user, _, _ = self.generate_sample_user(True)
         chat_id = TelegramChatId(user=user, chat_id="AAA")
+        api_key, _, _ = self.generate_api_key(user)
         self.db.session.add(chat_id)
         self.db.session.commit()
         should = user.__json__(False)
-        should.update({"telegram_chat_id": chat_id.__json__(False)})
+        should.update({
+            "telegram_chat_id": chat_id.__json__(True),
+            "api_keys": [api_key.__json__(True)]
+        })
+        should["telegram_chat_id"].pop("user")
+        for x in should["api_keys"]:
+            x.pop("user")
         self.assertEqual(user.__json__(True), should)

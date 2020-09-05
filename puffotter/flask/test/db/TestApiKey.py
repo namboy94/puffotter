@@ -43,12 +43,14 @@ class TestApiKey(_TestFramework):
                 "creation_time": api_key.creation_time
             }
         )
+        user_json = user.__json__(True)
+        user_json.pop("api_keys")
         self.assertEqual(
             api_key.__json__(True),
             {
                 "id": api_key.id,
                 "user_id": user.id,
-                "user": user.__json__(False),
+                "user": user_json,
                 "creation_time": api_key.creation_time
             }
         )
