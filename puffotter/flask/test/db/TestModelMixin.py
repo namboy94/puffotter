@@ -45,7 +45,7 @@ class TestModelMixin(_TestFramework):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
 
-            def __json__(self, include_children: bool = False) \
+            def __json__(self, include_children: bool = False,  _=None) \
                     -> Dict[str, Any]:
                 return {"id": self.id, "enum": self.enum.value}
 

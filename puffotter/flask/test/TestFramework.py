@@ -51,6 +51,8 @@ class _TestFramework(TestCase):
     Used to speed up the testing
     """
 
+    maxDiff = None
+
     module_name: str = "puffotter"
     models: List[db.Model] = []
     blueprint_generators: List[Tuple[Callable[[str], Blueprint], str]] = []
