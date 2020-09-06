@@ -1,3 +1,5 @@
+V 0.14.4:
+  - Only log ActionExceptions when they are code >= 500
 V 0.14.3:
   - Fixed flask model JSON behaviour when dealing with lists
 V 0.14.2:

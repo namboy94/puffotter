@@ -56,11 +56,17 @@ def api(func: Callable) -> Callable:
             try:
                 response["data"] = func(*args, **kwargs)
             except BaseException as e:
+                log_error = True
+                if isinstance(e, ApiException):
+                    if e.status_code < 500:
+                        log_error = False
+                if log_error:
+                    app.logger.error("Caught exception in API: {}".format(e))
+                    sentry_sdk.capture_exception(e)
+
                 for error_type in [
                     KeyError, TypeError, ValueError, ApiException
                 ]:
-                    app.logger.error("Caught exception in API: {}".format(e))
-                    sentry_sdk.capture_exception(e)
                     if isinstance(e, error_type):
                         raise e
                 raise ApiException("server error", 500)
