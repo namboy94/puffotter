@@ -19,7 +19,7 @@ LICENSE"""
 
 # noinspection PyProtectedMember
 from unittest import TestCase
-from puffotter.units import human_readable_bytes
+from puffotter.units import human_readable_bytes, byte_string_to_byte_count
 
 
 class TestUnits(TestCase):
@@ -36,3 +36,23 @@ class TestUnits(TestCase):
         self.assertEqual("1.024KB", human_readable_bytes(1024))
         self.assertEqual("0.123KB", human_readable_bytes(123))
         self.assertEqual("1.234GB", human_readable_bytes(1234123123))
+
+    def test_byte_string_to_byte_count(self):
+        """
+        Tests that human readable bytes are converted into byte count.
+        :return: None
+        """
+        self.assertEqual(1, byte_string_to_byte_count("1"))
+        self.assertEqual(10**3, byte_string_to_byte_count("1k"))
+        self.assertEqual(10**6, byte_string_to_byte_count("1m"))
+        self.assertEqual(10**9, byte_string_to_byte_count("1g"))
+        self.assertEqual(1500, byte_string_to_byte_count("1.5k"))
+        self.assertEqual(1500 * 10**3, byte_string_to_byte_count("1.5m"))
+        self.assertEqual(1500 * 10**6, byte_string_to_byte_count("1.5g"))
+
+        with self.assertRaises(ValueError):
+            byte_string_to_byte_count("1.1.1.1")
+        with self.assertRaises(ValueError):
+            byte_string_to_byte_count("1.5")
+        with self.assertRaises(ValueError):
+            byte_string_to_byte_count("1.5h")
