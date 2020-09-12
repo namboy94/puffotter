@@ -22,14 +22,14 @@ from unittest import TestCase
 from puffotter.units import human_readable_bytes
 
 
-class TestCrypto(TestCase):
+class TestUnits(TestCase):
     """
     Tests cryptographical functions
     """
 
     def test_converting_bytes_to_human_readable(self):
         """
-        Tests that passwords can be hashed successfully
+        Tests that bytes are successfully converted to human readable format.
         :return: None
         """
         self.assertEqual("1MB", human_readable_bytes(1000000))
