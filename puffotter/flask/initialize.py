@@ -81,6 +81,8 @@ def init_flask(
         TelegramChatId
     ]
 
+    if extra_jinja_vars is None:
+        extra_jinja_vars = {}
     __init_app(
         config,
         default_blueprint_generators + blueprint_generators,
