@@ -1,3 +1,5 @@
+V 0.15.2:
+  - Added extra jinja variables to test framework
 V 0.15.1:
   - Handles SMTP Authentication errors gracefully
 V 0.15.0:
