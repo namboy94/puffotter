@@ -21,7 +21,7 @@ import os
 import shutil
 from base64 import b64encode
 from unittest import TestCase
-from typing import Tuple, Dict, List, Type, Callable
+from typing import Tuple, Dict, List, Type, Callable, Any
 from flask.blueprints import Blueprint
 from flask_login import login_user
 from puffotter.crypto import generate_random, generate_hash
@@ -58,6 +58,7 @@ class _TestFramework(TestCase):
     blueprint_generators: List[Tuple[Callable[[str], Blueprint], str]] = []
     root_path: str = "."
     config: Type[Config] = Config
+    extra_jinja_vars: Dict[str, Any] = {}
 
     def setUp(self):
         """
@@ -102,7 +103,8 @@ class _TestFramework(TestCase):
             self.root_path,
             self.config,
             self.models,
-            self.blueprint_generators
+            self.blueprint_generators,
+            self.extra_jinja_vars
         )
         self.app.app_context().push()
 
