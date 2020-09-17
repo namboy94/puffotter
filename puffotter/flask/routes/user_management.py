@@ -27,7 +27,7 @@ def define_blueprint(blueprint_name: str) -> Blueprint:
         :return: The response
         """
         if request.method == "POST":
-            username = request.form["username"]
+            username = request.form["username"].strip()
             password = request.form["password"]
             remember_me = request.form.get("remember_me") in ["on", True]
 

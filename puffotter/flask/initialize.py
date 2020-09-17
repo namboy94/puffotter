@@ -27,7 +27,7 @@ from logging.handlers import TimedRotatingFileHandler
 from sqlalchemy.exc import OperationalError
 from sentry_sdk.integrations.logging import LoggingIntegration
 from sentry_sdk.integrations.flask import FlaskIntegration
-from typing import List, Optional, Type, Callable, Tuple
+from typing import List, Optional, Type, Callable, Tuple, Dict, Any
 from flask import redirect, url_for, flash, render_template
 from flask.logging import default_handler
 from flask.blueprints import Blueprint
@@ -56,7 +56,8 @@ def init_flask(
         root_path: str,
         config: Type[Config],
         models: List[Type[db.Model]],
-        blueprint_generators: List[Tuple[Callable[[str], Blueprint], str]]
+        blueprint_generators: List[Tuple[Callable[[str], Blueprint], str]],
+        extra_jinja_vars: Optional[Dict[str, Any]] = None
 ):
     """
     Initializes the flask application
@@ -67,6 +68,7 @@ def init_flask(
     :param models: The database models to create
     :param blueprint_generators: Tuples that contain a function that generates
                                  a blueprint and the name of the blueprint
+    :param extra_jinja_vars: Any extra variables to pass to jinja
     :return: None
     """
     app.root_path = root_path
@@ -79,7 +81,13 @@ def init_flask(
         TelegramChatId
     ]
 
-    __init_app(config, default_blueprint_generators + blueprint_generators)
+    if extra_jinja_vars is None:
+        extra_jinja_vars = {}
+    __init_app(
+        config,
+        default_blueprint_generators + blueprint_generators,
+        extra_jinja_vars
+    )
     __init_db(config, default_models + models)
     __init_login_manager()
 
@@ -136,13 +144,15 @@ def __init_logging(config: Type[Config]):
 
 def __init_app(
         config: Type[Config],
-        blueprint_generators: List[Tuple[Callable[[str], Blueprint], str]]
+        blueprint_generators: List[Tuple[Callable[[str], Blueprint], str]],
+        extra_jinja_vars: Dict[str, Any]
 ):
     """
     Initializes the flask app
     :param config: The configuration to use
     :param blueprint_generators: Tuples that contain a function that generates
                                  a blueprint and the name of the blueprint
+    :param extra_jinja_vars: Any extra variables to pass to jinja
     :return: None
     """
     app.testing = config.TESTING
@@ -166,11 +176,13 @@ def __init_app(
         in templates
         :return: The dictionary to inject
         """
-        return {
+        defaults = {
             "version": config.VERSION,
             "env": app.env,
             "config": config
         }
+        defaults.update(extra_jinja_vars)
+        return defaults
 
     @app.errorhandler(Exception)
     def exception_handling(e: Exception):
