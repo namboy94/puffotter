@@ -1,6 +1,7 @@
 import os
 from typing import Union
 from werkzeug import Response
+from smtplib import SMTPAuthenticationError
 from flask import Blueprint, redirect, url_for, request, render_template, flash
 from flask_login import login_required, current_user, logout_user, login_user
 from puffotter.crypto import generate_hash, generate_random
@@ -120,15 +121,20 @@ def define_blueprint(blueprint_name: str) -> Blueprint:
                     confirm_key=confirmation_key,
                     **Config.TEMPLATE_EXTRAS["registration_email"]()
                 )
-                send_email(
-                    email,
-                    Config.STRINGS["registration_email_title"],
-                    email_msg,
-                    Config.SMTP_HOST,
-                    Config.SMTP_ADDRESS,
-                    Config.SMTP_PASSWORD,
-                    Config.SMTP_PORT
-                )
+                try:
+                    send_email(
+                        email,
+                        Config.STRINGS["registration_email_title"],
+                        email_msg,
+                        Config.SMTP_HOST,
+                        Config.SMTP_ADDRESS,
+                        Config.SMTP_PASSWORD,
+                        Config.SMTP_PORT
+                    )
+                except SMTPAuthenticationError:
+                    app.logger.error("Failed to authenticate SMTP, could not "
+                                     "send confirmation email to user")
+                    flash("SMTP AUTHENTICATION ERROR", "danger")
                 app.logger.info("User {} registered.".format(user.username))
                 flash(Config.STRINGS["registration_successful"], "info")
                 return redirect(url_for("static.index"))
@@ -199,15 +205,19 @@ def define_blueprint(blueprint_name: str) -> Blueprint:
                         username=user.username,
                         **Config.TEMPLATE_EXTRAS["forgot_email"]()
                     )
-                    send_email(
-                        email,
-                        Config.STRINGS["password_reset_email_title"],
-                        email_msg,
-                        Config.SMTP_HOST,
-                        Config.SMTP_ADDRESS,
-                        Config.SMTP_PASSWORD,
-                        Config.SMTP_PORT
-                    )
+                    try:
+                        send_email(
+                            email,
+                            Config.STRINGS["password_reset_email_title"],
+                            email_msg,
+                            Config.SMTP_HOST,
+                            Config.SMTP_ADDRESS,
+                            Config.SMTP_PASSWORD,
+                            Config.SMTP_PORT
+                        )
+                    except SMTPAuthenticationError:
+                        app.logger.error("SMTP Authentication failed")
+                        flash("SMTP AUTHENTICATION FAILED", "info")
                 flash(Config.STRINGS["password_was_reset"], "success")
                 return redirect(url_for("static.index"))
 
