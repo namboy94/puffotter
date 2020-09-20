@@ -34,7 +34,7 @@ def verify_recaptcha(
     :param secret_key: the recaptcha secret key
     :return: True if the recaptcha response was correct, False otherwise
     """
-    return client_ip in ["localhost", "127.0.0.1"] or requests.post(
+    return requests.post(
         "https://www.google.com/recaptcha/api/siteverify",
         data={
             "secret": secret_key,
