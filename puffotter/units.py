@@ -43,23 +43,17 @@ def byte_string_to_byte_count(byte_string: str) -> int:
         byte_string = byte_string.replace(unit + "b/s", unit)
         byte_string = byte_string.replace(unit + "b", unit)
 
-    multiplier = 1
-    byte_num = ""
-    for i, char in enumerate(byte_string):
-        if char.isdigit():
-            byte_num += char
-        else:
-            # Unit should be last symbol in string
-            if len(byte_string) - 1 != i:
-                raise ValueError()
-            else:
-                try:
-                    multiplier = units[char]
-                except KeyError:
-                    raise ValueError()
+    multiplier_char = byte_string[-1]
+    if multiplier_char.isdigit():
+        if byte_string.find(".") != -1:
+            raise ValueError()
+        return int(byte_string)
 
-    return multiplier * int(byte_num)
-
+    try:
+        multiplier = units[multiplier_char]
+        return int(float(byte_string[:-1]) * multiplier)
+    except KeyError:
+        raise ValueError()
 
 def human_readable_bytes(
         bytecount: int,
