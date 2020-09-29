@@ -41,18 +41,6 @@ if __name__ == "__main__":
             "colorama"
         ],
         extras_require={
-            "flask": [
-                "flask",
-                "flask-sqlalchemy",
-                "flask-login",
-                "sqlalchemy",
-                "cheroot",
-                "werkzeug",
-                "sentry-sdk[flask]",
-                "blinker",
-                "bokkichat",
-                "python-telegram-bot"
-            ],
             "crypto": [
                 "bcrypt"
             ]
