@@ -1,3 +1,7 @@
+V 0.17.0:
+  - Removed flask and created new project 'jerrycan'
+V 0.16.0:
+  - Made ReCaptcha also check on localhost and 127.0.0.1
 V 0.15.2:
   - Added extra jinja variables to test framework
 V 0.15.1:
