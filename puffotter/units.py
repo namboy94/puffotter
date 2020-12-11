@@ -31,12 +31,10 @@ def byte_string_to_byte_count(byte_string: str) -> int:
     byte_string = byte_string.lower()
 
     units = {
-        "k": 1000,
-        "m": 1000000,
-        "g": 1000000000,
-        "t": 1000000000000,
-        "p": 1000000000000000,
-        "e": 1000000000000000000
+        denominator: 10**(3 * (i + 1))
+        for i, denominator in enumerate([
+            "k", "m", "g", "t", "p", "e"
+        ])
     }
 
     for unit in units:
@@ -46,7 +44,7 @@ def byte_string_to_byte_count(byte_string: str) -> int:
     multiplier = 1
     byte_num = ""
     for i, char in enumerate(byte_string):
-        if char.isdigit():
+        if char.isdigit() or char == ".":
             byte_num += char
         else:
             # Unit should be last symbol in string
@@ -58,7 +56,8 @@ def byte_string_to_byte_count(byte_string: str) -> int:
                 except KeyError:
                     raise ValueError()
 
-    return multiplier * int(byte_num)
+    byte_count = int(multiplier * float(byte_num))
+    return byte_count
 
 
 def human_readable_bytes(
