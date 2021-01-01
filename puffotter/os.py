@@ -116,3 +116,13 @@ def get_ext(filename: str) -> Optional[str]:
         return filename.rsplit(".", 1)[1]
     except IndexError:
         return None
+
+
+def touch(path: str):
+    """
+    Ensures that a file exists
+    :param path: Path to the file to ensure it exists
+    """
+    if not os.path.exists:
+        with open(path, "w") as f:
+            f.write("")
