@@ -19,6 +19,7 @@ LICENSE"""
 
 import os
 import shutil
+from pathlib import Path
 from typing import Tuple, List, Optional
 
 
@@ -123,6 +124,4 @@ def touch(path: str):
     Ensures that a file exists
     :param path: Path to the file to ensure it exists
     """
-    if not os.path.exists:
-        with open(path, "w") as f:
-            f.write("")
+    Path(path).touch()
