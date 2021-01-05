@@ -1,3 +1,7 @@
+V 0.17.2:
+  - Added touch function
+V 0.17.1:
+  - Fixed byte string count conversion on decimal numbers
 V 0.17.0:
   - Removed flask and created new project 'jerrycan'
 V 0.16.0:

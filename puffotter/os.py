@@ -19,6 +19,7 @@ LICENSE"""
 
 import os
 import shutil
+from pathlib import Path
 from typing import Tuple, List, Optional
 
 
@@ -116,3 +117,11 @@ def get_ext(filename: str) -> Optional[str]:
         return filename.rsplit(".", 1)[1]
     except IndexError:
         return None
+
+
+def touch(path: str):
+    """
+    Ensures that a file exists
+    :param path: Path to the file to ensure it exists
+    """
+    Path(path).touch()

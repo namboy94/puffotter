@@ -19,20 +19,28 @@ LICENSE"""
 
 # noinspection PyProtectedMember
 from unittest import TestCase
-from puffotter.units import human_readable_bytes
+from puffotter.units import human_readable_bytes, byte_string_to_byte_count
 
 
-class TestCrypto(TestCase):
+class TestUnits(TestCase):
     """
-    Tests cryptographical functions
+    Tests functions that handle units conversion
     """
 
-    def test_converting_bytes_to_human_readable(self):
+    def test_byte_conversion(self):
         """
-        Tests that passwords can be hashed successfully
+        Tests that byte strings can be parsed correctly and displayed in
+        a human-readable format
         :return: None
         """
-        self.assertEqual("1MB", human_readable_bytes(1000000))
-        self.assertEqual("1.024KB", human_readable_bytes(1024))
-        self.assertEqual("0.123KB", human_readable_bytes(123))
+        for string, count in [
+            ("1MB", 1000000),
+            ("1.024KB", 1024),
+            ("0.123KB", 123),
+            ("1.234GB", 1234000000)
+        ]:
+            self.assertEqual(string, human_readable_bytes(count))
+            self.assertEqual(byte_string_to_byte_count(string), count)
+
+        # Test if human-readable strings are rounded correctly
         self.assertEqual("1.234GB", human_readable_bytes(1234123123))
