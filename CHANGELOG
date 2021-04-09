@@ -1,3 +1,5 @@
+V 0.17.3:
+  - Fixed human readable byte conversion for negative numbers
 V 0.17.2:
   - Added touch function
 V 0.17.1:
