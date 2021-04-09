@@ -63,7 +63,8 @@ def byte_string_to_byte_count(byte_string: str) -> int:
 def human_readable_bytes(
         bytecount: int,
         base_1024: bool = False,
-        remove_trailing_zeroes: bool = True
+        remove_trailing_zeroes: bool = True,
+        decimals: int = 2
 ) -> str:
     """
     Converts an amount of bytes into a human-readable string
@@ -71,6 +72,7 @@ def human_readable_bytes(
     :param base_1024: Whether or not to use 1024 as base (for mebibytes etc)
     :param remove_trailing_zeroes: If set to True, will remove any trailing
                                    zeroes from the string
+    :param decimals: The amount of decimal spaces
     :return: The human-readable string
     """
     negative = False
@@ -91,7 +93,7 @@ def human_readable_bytes(
             break
 
     # Formatting
-    bytestring = ("%.3f" % _bytes)
+    bytestring = (("%." + str(decimals) + "f") % _bytes)
 
     if remove_trailing_zeroes:
         string_index = len(bytestring) - 1
