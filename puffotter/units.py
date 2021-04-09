@@ -73,6 +73,11 @@ def human_readable_bytes(
                                    zeroes from the string
     :return: The human-readable string
     """
+    negative = False
+    if bytecount < 0:
+        negative = True
+        bytecount *= -1
+
     units = ["K", "M", "G", "T", "P", "E", "Z", "Y"]
     unit_index = -1
     base = 1024 if base_1024 else 1000
@@ -98,4 +103,8 @@ def human_readable_bytes(
             bytestring = bytestring[0:-1]
 
     i = "i" if base_1024 else ""
-    return bytestring + units[unit_index] + i + "B"
+    bytestring += units[unit_index] + i + "B"
+
+    if negative:
+        bytestring = "-" + bytestring
+    return bytestring
